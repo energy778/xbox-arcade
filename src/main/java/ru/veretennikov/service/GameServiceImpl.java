@@ -20,7 +20,6 @@ public class GameServiceImpl implements GameService {
     @Override
     @Transactional(readOnly = true)
     public List<Game> getAll() {
-//        against cartesian product
         List<Game> games = repository.findAllWithGenres();
         return repository.findAllWithAllDetailsByGamesWithGenres(games);
     }
@@ -28,11 +27,8 @@ public class GameServiceImpl implements GameService {
     @Override
     @Transactional(readOnly = true)
     public Game getById(UUID uuid) {
-//        against cartesian product
         Game game = repository.findOneWithGenresById(uuid);
-        return repository.findOneWithAllDetailsByGame(game);
+        return repository.findOneWithAllDetailsByGameWithGenres(game);
     }
-
-//    если взлетит, то сделать еще и обратные методы и добавить проверки после первого вызова
 
 }

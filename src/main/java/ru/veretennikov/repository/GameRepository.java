@@ -12,22 +12,24 @@ import java.util.UUID;
 @Repository
 public interface GameRepository extends JpaRepository<Game, UUID> {
 
+//    https://vladmihalcea.com/hibernate-multiplebagfetchexception/     against cartesian product
+
     @Query("SELECT g FROM Game g " +
-            "LEFT JOIN FETCH g.genres gg " +
+            "LEFT JOIN FETCH g.genres " +
             "WHERE g.id = :id")
     Game findOneWithGenresById(@Param("id") UUID id);
 
     @Query("SELECT g FROM Game g " +
-            "LEFT JOIN FETCH g.screens gs " +
+            "LEFT JOIN FETCH g.screens " +
             "WHERE g = :game")
-    Game findOneWithAllDetailsByGame(@Param("game") Game game);
+    Game findOneWithAllDetailsByGameWithGenres(@Param("game") Game game);
 
     @Query("SELECT g FROM Game g " +
-            "LEFT JOIN FETCH g.genres gg")
+            "LEFT JOIN FETCH g.genres")
     List<Game> findAllWithGenres();
 
     @Query("SELECT g FROM Game g " +
-            "LEFT JOIN FETCH g.screens gs " +
+            "LEFT JOIN FETCH g.screens " +
             "WHERE g in :games")
     List<Game> findAllWithAllDetailsByGamesWithGenres(@Param("games") List<Game> games);
 

@@ -96,6 +96,10 @@ public final class Meta {
              */
             public static final String id = "id";
             /**
+             * Наименование жанра
+             */
+            public static final String name = "name";
+            /**
              * ID игры
              */
             public static final String id_game = "id_game";
@@ -103,10 +107,6 @@ public final class Meta {
              * Игра
              */
             public static final String game = "game";
-            /**
-             * Жанр
-             */
-            public static final String genre = "genre";
         }
         //endregion
     }
@@ -124,14 +124,6 @@ public final class Meta {
              */
             public static final String id = "id";
             /**
-             * ID игры
-             */
-            public static final String id_game = "id_game";
-            /**
-             * Игра
-             */
-            public static final String game = "game";
-            /**
              * Имя скриншота
              */
             public static final String name = "name";
@@ -139,6 +131,14 @@ public final class Meta {
              * Ссылка на скриншот
              */
             public static final String url = "url";
+            /**
+             * ID игры
+             */
+            public static final String id_game = "id_game";
+            /**
+             * Игра
+             */
+            public static final String game = "game";
         }
         //endregion
     }

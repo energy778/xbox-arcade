@@ -15,6 +15,7 @@ import javax.persistence.*;
 public class GameGenre {
 
     @Id
+    @JsonIgnore
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = Meta.game_genre.fields.id)
     private Integer id;
@@ -26,7 +27,7 @@ public class GameGenre {
     @JoinColumn(name = Meta.game_genre.fields.id_game, nullable = false)
     private Game game;
 
-    @Column(name = Meta.game_genre.fields.genre, nullable = false)
-    private String genre;
+    @Column(name = Meta.game_genre.fields.name, nullable = false)
+    private String name;
 
 }

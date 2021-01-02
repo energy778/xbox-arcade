@@ -15,6 +15,7 @@ import javax.persistence.*;
 public class GameScreen {
 
     @Id
+    @JsonIgnore
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = Meta.game_screen.fields.id)
     private Integer id;

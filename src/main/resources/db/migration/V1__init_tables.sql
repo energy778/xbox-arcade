@@ -27,7 +27,7 @@ create table if not exists game_genre
         constraint game_genre_game_id_fk
             references game
             on update cascade on delete cascade,
-    genre   varchar not null
+    name   varchar not null
 );
 
 comment on table game_genre is 'жанры игр';
