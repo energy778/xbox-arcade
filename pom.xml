@@ -13,11 +13,13 @@
 	<version>1.0.0</version>
 	<packaging>war</packaging>
 	<name>xbox-arcade</name>
-	<description></description>
 
 	<properties>
 		<java.version>15</java.version>
 		<vaadin.version>14.4.5</vaadin.version>
+		<flyway-core.version>7.1.1</flyway-core.version>
+		<flyway-maven-plugin.version>7.3.2</flyway-maven-plugin.version>
+		<flyway-maven-plugin.configFiles>flyway.properties</flyway-maven-plugin.configFiles>
 	</properties>
 
 	<dependencies>
@@ -36,7 +38,7 @@
 		<dependency>
 			<groupId>org.flywaydb</groupId>
 			<artifactId>flyway-core</artifactId>
-			<version>7.1.1</version>
+			<version>${flyway-core.version}</version>
 		</dependency>
 
 		<dependency>
@@ -93,9 +95,9 @@
 				<!-- https://mvnrepository.com/artifact/org.flywaydb/flyway-maven-plugin -->
 				<groupId>org.flywaydb</groupId>
 				<artifactId>flyway-maven-plugin</artifactId>
-				<version>7.3.2</version>
+				<version>${flyway-maven-plugin.version}</version>
 				<configuration>
-					<configFiles>flyway.properties</configFiles>
+					<configFiles>${flyway-maven-plugin.configFiles}</configFiles>
 				</configuration>
 			</plugin>
 
