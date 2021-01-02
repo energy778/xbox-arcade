@@ -33,3 +33,5 @@ package-lock.json
 webpack.generated.js
 #package.json
 #webpack.config.js
+
+flyway.properties
