@@ -12,4 +12,6 @@ public interface GameService {
     Optional<GameDTO> getById(UUID uuid);
     List<GameWithDetailsDTO> getAllWithDetails();
     Optional<GameWithDetailsDTO> getByIdWithDetails(UUID uuid);
+
+    List<GameDTO> getAllByNameLike(String filterText);
 }

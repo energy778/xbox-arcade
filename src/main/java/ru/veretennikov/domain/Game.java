@@ -21,6 +21,9 @@ public class Game {
     @Column(name = Meta.game.fields.id)
     private UUID id;
 
+    @Column(name = Meta.game.fields.name)
+    private String name;
+
     @Column(name = Meta.game.fields.game_url)
     private String gameUrl;
 

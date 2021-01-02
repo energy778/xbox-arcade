@@ -52,10 +52,18 @@ public class GameServiceImpl implements GameService {
                 .map(this::buildDTOWithDetails);
     }
 
+    @Override
+    public List<GameDTO> getAllByNameLike(String name) {
+        return repository.findAllByNameLike(name).stream()
+                .map(this::buildDTO)
+                .collect(Collectors.toList());
+    }
+
 
     private GameDTO buildDTO(Game game) {
         return GameDTO.builder()
                 .id(game.getId())
+                .name(game.getName())
                 .gameUrl(game.getGameUrl())
                 .picUrl(game.getPicUrl())
                 .releaseDate(game.getReleaseDate())
@@ -74,6 +82,7 @@ public class GameServiceImpl implements GameService {
     private GameWithDetailsDTO buildDTOWithDetails(Game game) {
         return GameWithDetailsDTO.builder()
                 .id(game.getId())
+                .name(game.getName())
                 .gameUrl(game.getGameUrl())
                 .picUrl(game.getPicUrl())
                 .releaseDate(game.getReleaseDate())

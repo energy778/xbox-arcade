@@ -15,6 +15,8 @@ public class GameWithDetailsDTO {
 
     private UUID id;
 
+    private String name;
+
     private String gameUrl;
 
     private String picUrl;
