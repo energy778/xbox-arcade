@@ -65,6 +65,7 @@
 
 	<dependencyManagement>
 		<dependencies>
+<!--			this block for to use a newer version Vaadin -->
 			<dependency>
 				<groupId>com.vaadin</groupId>
 				<artifactId>vaadin-bom</artifactId>
