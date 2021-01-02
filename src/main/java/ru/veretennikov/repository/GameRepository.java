@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 import ru.veretennikov.domain.Game;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -17,12 +18,12 @@ public interface GameRepository extends JpaRepository<Game, UUID> {
     @Query("SELECT g FROM Game g " +
             "LEFT JOIN FETCH g.genres " +
             "WHERE g.id = :id")
-    Game findOneWithGenresById(@Param("id") UUID id);
+    Optional<Game> findOneWithGenresById(@Param("id") UUID id);
 
     @Query("SELECT g FROM Game g " +
             "LEFT JOIN FETCH g.screens " +
             "WHERE g = :game")
-    Game findOneWithAllDetailsByGameWithGenres(@Param("game") Game game);
+    Optional<Game> findOneWithAllDetailsByGameWithGenres(@Param("game") Game game);
 
     @Query("SELECT g FROM Game g " +
             "LEFT JOIN FETCH g.genres")

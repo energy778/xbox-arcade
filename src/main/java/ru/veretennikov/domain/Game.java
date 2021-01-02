@@ -22,13 +22,13 @@ public class Game {
     private UUID id;
 
     @Column(name = Meta.game.fields.game_url)
-    private String game_url;
+    private String gameUrl;
 
     @Column(name = Meta.game.fields.pic_url)
-    private String pic_url;
+    private String picUrl;
 
     @Column(name = Meta.game.fields.release_date)
-    private LocalDate release_date;
+    private LocalDate releaseDate;
 
     @Column(name = Meta.game.fields.description1)
     private String description1;
@@ -49,7 +49,7 @@ public class Game {
     private boolean availability;
 
     @Column(name = Meta.game.fields.date_issue)
-    private LocalDate date_issue;
+    private LocalDate dateIssue;
 
     @Column(name = Meta.game.fields.developer)
     private String developer;

@@ -3,7 +3,8 @@ package ru.veretennikov.controller;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.veretennikov.domain.Game;
+import ru.veretennikov.dto.GameDTO;
+import ru.veretennikov.dto.GameWithDetailsDTO;
 import ru.veretennikov.service.GameService;
 
 import javax.validation.constraints.NotNull;
@@ -20,18 +21,34 @@ public class MainController {
         this.gameService = gameService;
     }
 
+    @GetMapping(value = "/full/all", produces = MediaType.APPLICATION_JSON_VALUE)
+    public @ResponseBody
+    ResponseEntity<List<GameWithDetailsDTO>> getAllGamesWithDetails() {
+        List<GameWithDetailsDTO> games = gameService.getAllWithDetails();
+        return games.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(games);
+    }
+
+    @GetMapping(value = "/full/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public ResponseEntity<GameWithDetailsDTO> getGameWithDetails(@PathVariable("id") @NotNull UUID id) {
+        return gameService.getByIdWithDetails(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.noContent().build());
+    }
+
     @GetMapping(value = "/all", produces = MediaType.APPLICATION_JSON_VALUE)
     public @ResponseBody
-    ResponseEntity<?> getAllGames() {
-        List<Game> games = gameService.getAll();
-        return ResponseEntity.ok(games);
+    ResponseEntity<List<GameDTO>> getAllGames() {
+        List<GameDTO> games = gameService.getAll();
+        return games.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(games);
     }
 
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public ResponseEntity<?> getGame(@PathVariable("id") @NotNull UUID uuid) {
-        Game game = gameService.getById(uuid);
-        return ResponseEntity.ok(game);
+    public ResponseEntity<GameDTO> getGame(@PathVariable("id") @NotNull UUID id) {
+        return gameService.getById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.noContent().build());
     }
 
 }
