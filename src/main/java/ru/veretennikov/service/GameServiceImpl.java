@@ -7,8 +7,11 @@ import ru.veretennikov.domain.GameGenre;
 import ru.veretennikov.domain.GameScreen;
 import ru.veretennikov.dto.GameDTO;
 import ru.veretennikov.dto.GameWithDetailsDTO;
+import ru.veretennikov.repository.GameGenreRepository;
 import ru.veretennikov.repository.GameRepository;
+import ru.veretennikov.repository.GameScreenRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -18,9 +21,13 @@ import java.util.stream.Collectors;
 public class GameServiceImpl implements GameService {
 
     private final GameRepository repository;
+    private final GameGenreRepository genreRepository;
+    private final GameScreenRepository screenRepository;
 
-    public GameServiceImpl(GameRepository repository) {
+    public GameServiceImpl(GameRepository repository, GameGenreRepository genreRepository, GameScreenRepository screenRepository) {
         this.repository = repository;
+        this.genreRepository = genreRepository;
+        this.screenRepository = screenRepository;
     }
 
     @Override
@@ -57,6 +64,42 @@ public class GameServiceImpl implements GameService {
         return repository.findAllByNameLike(name).stream()
                 .map(this::buildDTO)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public void delete(UUID id) {
+        repository.deleteById(id);
+    }
+
+    @Override
+    public GameWithDetailsDTO save(GameWithDetailsDTO gameWithDetailsDTO) {
+        Game gameForSave = Game.builder()
+                .id(gameWithDetailsDTO.getId())
+                .name(gameWithDetailsDTO.getName())
+                .gameUrl(gameWithDetailsDTO.getGameUrl())
+                .picUrl(gameWithDetailsDTO.getPicUrl())
+                .releaseDate(gameWithDetailsDTO.getReleaseDate())
+                .description1(gameWithDetailsDTO.getDescription1())
+                .description2(gameWithDetailsDTO.getDescription2())
+                .rating(gameWithDetailsDTO.getRating())
+                .price(gameWithDetailsDTO.getPrice())
+                .location(gameWithDetailsDTO.getLocation())
+                .availability(gameWithDetailsDTO.isAvailability())
+                .dateIssue(gameWithDetailsDTO.getDateIssue())
+                .developer(gameWithDetailsDTO.getDeveloper())
+                .publisher(gameWithDetailsDTO.getPublisher())
+                // TODO: 03.01.21 genres and screens may be editable
+                .genres(Optional.ofNullable(gameWithDetailsDTO.getId())
+                        .map(genreRepository::findAllByGameId)
+                        .orElse(new ArrayList<>()))
+                .screens(Optional.ofNullable(gameWithDetailsDTO.getId())
+                        .map(screenRepository::findAllByGameId)
+                        .orElse(new ArrayList<>()))
+                .build();
+
+        Game game = repository.save(gameForSave);
+
+        return buildDTOWithDetails(game);
     }
 
 

@@ -17,7 +17,6 @@ import java.util.UUID;
 public class Game {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = Meta.game.fields.id)
     private UUID id;
 
