@@ -5,11 +5,16 @@ import com.vaadin.flow.component.KeyNotifier;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.datepicker.DatePicker;
+import com.vaadin.flow.component.details.Details;
+import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.tabs.Tab;
+import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
@@ -21,11 +26,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import ru.veretennikov.dto.GameWithDetailsDTO;
 import ru.veretennikov.service.GameService;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.Locale;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Stream;
 
 @SpringComponent
 @UIScope
@@ -59,7 +64,10 @@ public class GameEditor extends VerticalLayout implements KeyNotifier {
     Checkbox availabilityField = new Checkbox("Availability");
     DatePicker dateIssueField = new DatePicker("Date issue");
     TextField developerField = new TextField("Developer");
+    Image pic = new Image();
     TextField publisherField = new TextField("Publisher");
+    Tabs tabs = new Tabs();
+    Image currentScreen = new Image();
 
     /* Action buttons */
     Button save = new Button("Save", VaadinIcon.CHECK.create());
@@ -93,7 +101,6 @@ public class GameEditor extends VerticalLayout implements KeyNotifier {
     }
 
     private void initFields() {
-
         idField.setWidth("31em");
         idField.setClearButtonVisible(true);
         nameField.setWidth("31em");
@@ -145,31 +152,41 @@ public class GameEditor extends VerticalLayout implements KeyNotifier {
         publisherField.setWidth("15em");
         publisherField.setClearButtonVisible(true);
 
-        add(idField,
-            nameField,
-            gameUrlField,
-            picUrlField,
-            description1Field,
-            description2Field,
-            new HorizontalLayout(ratingField, priceField),
-            locationField,
-            availabilityField,
-            new HorizontalLayout(vlReleaseDate, vlDateIssue),
-            new HorizontalLayout(developerField, publisherField),
-            actions);
+        tabs.setAutoselect(false);
+        tabs.setFlexGrowForEnclosedTabs(1);
+        tabs.addSelectedChangeListener(this::refreshScreen);
 
-//        поле картинки игры
-//        плюс поля вывода списка жанра - только для чтения + байндер
-//        плюс картинки по вкладкам
+
+        /* grouping */
+        Details descriptionDetails = new Details("Description", new FormLayout(new VerticalLayout(description1Field, description2Field)));
+        Details otherDetails = new Details("Other", new VerticalLayout(
+                new HorizontalLayout(ratingField, priceField),
+                new HorizontalLayout(developerField, publisherField),
+                new HorizontalLayout(vlReleaseDate, vlDateIssue)
+        ));
+        Details screensDetails = new Details("Screenshots", new VerticalLayout(tabs, currentScreen));
+
+        add(pic,
+            new FormLayout(idField, nameField, gameUrlField, locationField),
+            availabilityField,
+            descriptionDetails,
+            otherDetails,
+            screensDetails,
+            actions);
     }
 
     @SuppressWarnings("DuplicatedCode")
     private void setBinding() {
         binder.bind(idField,
                 gameWithDetailsDTO ->
-                        Optional.ofNullable(gameWithDetailsDTO.getId()).map(UUID::toString).orElse(null),
+                        Optional.ofNullable(gameWithDetailsDTO.getId())
+                                .map(UUID::toString)
+                                .orElse(null),
                 (newValue, id) ->
-                        newValue.setId(Optional.ofNullable(id).filter(s -> !s.isBlank()).map(UUID::fromString).orElse(null)));
+                        newValue.setId(Optional.ofNullable(id)
+                                .filter(s -> !s.isBlank())
+                                .map(UUID::fromString)
+                                .orElse(null)));
         binder.bind(nameField, GameWithDetailsDTO::getName, GameWithDetailsDTO::setName);
         binder.bind(gameUrlField, GameWithDetailsDTO::getGameUrl, GameWithDetailsDTO::setGameUrl);
         /* alternative method */
@@ -203,6 +220,10 @@ public class GameEditor extends VerticalLayout implements KeyNotifier {
             currentGame = service.getByIdWithDetails(id).orElse(null);
 
         final boolean persisted = currentGame != null;
+
+        refreshPic();
+        currentScreen.setSrc("");
+        initScreenTabs();
 
         cancel.setVisible(persisted);
         delete.setVisible(persisted);
@@ -239,6 +260,67 @@ public class GameEditor extends VerticalLayout implements KeyNotifier {
         String monthName = datePickerI18n.getMonthNames().get(month);
 
         return "День недели: " + weekdayName + ", месяц: " + monthName;
+    }
+
+    private void refreshPic() {
+        Optional<String> picUrlOpt = Optional.ofNullable(currentGame).map(GameWithDetailsDTO::getPicUrl);
+        if (picUrlOpt.isEmpty())
+            pic.setSrc("");
+        else {
+            try {
+                pic.setSrc(new URL(picUrlOpt.get()).toString());
+            } catch (MalformedURLException ignored) {}
+        }
+    }
+
+    private void initScreenTabs() {
+        tabs.removeAll();
+        Stream.ofNullable(currentGame)
+                .map(GameWithDetailsDTO::getScreens)
+                .filter(Objects::nonNull)
+                .flatMap(Collection::stream)
+                .forEach(gameScreen -> tabs.add(new Tab(gameScreen.getName())));
+    }
+
+    private void refreshScreen(Tabs.SelectedChangeEvent selectedChangeEvent) {
+        currentScreen.setSrc(Optional.ofNullable(currentGame)
+                .map(game -> Stream.ofNullable(game.getScreens())
+                        .flatMap(Collection::stream)
+                        .filter(gameScreen -> selectedChangeEvent.getSelectedTab() != null
+                                && selectedChangeEvent.getSelectedTab().getLabel() != null
+                                && selectedChangeEvent.getSelectedTab().getLabel().equals(gameScreen.getName()))
+                        .map(GameWithDetailsDTO.GameScreenDTO::getUrl)
+                        .map(urlString -> {
+                            try {
+                                return new URL(urlString).toString();
+                            } catch (MalformedURLException ignored) {}
+                            return "";
+                        })
+                        .findAny()
+                        .orElse(""))
+                .orElse(""));
+    }
+
+    private void refreshScreen2(Tabs.SelectedChangeEvent selectedChangeEvent) {
+        Tab selectedTab = selectedChangeEvent.getSelectedTab();
+        if (selectedTab == null || selectedTab.getLabel() == null) {
+            currentScreen.setSrc("");
+            return;
+        }
+
+        Optional<String> picUrlOpt = Stream.ofNullable(currentGame)
+                .map(GameWithDetailsDTO::getScreens)
+                .flatMap(Collection::stream)
+                .filter(gameScreen -> selectedTab.getLabel().equals(gameScreen.getName()))
+                .map(GameWithDetailsDTO.GameScreenDTO::getUrl)
+                .findAny();
+        if (picUrlOpt.isEmpty())
+            currentScreen.setSrc("");
+        else {
+            try {
+                currentScreen.setSrc(new URL(picUrlOpt.get()).toString());
+            } catch (MalformedURLException ignored) {}
+        }
     }
 
 }

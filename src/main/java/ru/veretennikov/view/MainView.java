@@ -3,6 +3,7 @@ package ru.veretennikov.view;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.KeyModifier;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -43,24 +44,29 @@ public class MainView extends VerticalLayout {
         add(actions, grid, editor);
 
         grid.setHeight("300px");
-        grid.setColumns("name", "releaseDate", "rating", "price", "availability", "developer", "publisher");
+        grid.removeAllColumns();
+
+        grid.addColumn(item -> "").setKey("rowIndex")
+                .setHeader("№")
+                .setWidth("1em");
+//                .setAutoWidth(true);
+        grid.getColumnByKey("rowIndex").getElement()
+                .executeJs("this.renderer = function(root, column, rowData) {root.textContent = rowData.index + 1}");
+
+        grid.addColumns("name", "releaseDate", "rating", "price", "developer", "publisher");
         grid.getColumnByKey("name").setWidth("17em");
 
-//        grid.addColumn(item -> "").setKey("rowIndex")
-//                .setHeader("№")
-//                .setAutoWidth(true);
-//        grid.getColumnByKey("rowIndex").getElement()
-//                .executeJs("this.renderer = function(root, column, rowData) {root.textContent = rowData.index + 1}");
+        grid.addComponentColumn(gameDTO -> {
+            Checkbox checkbox = new Checkbox(!gameDTO.getPicUrl().isBlank());
+            checkbox.setEnabled(false);
+            return checkbox;
+        }).setHeader("pic").setWidth("1em");
 
-//        grid.addComponentColumn(gameDTO -> {
-//            URL url = null;
-//            try {
-//                url = new URL(gameDTO.getPicUrl());
-//            } catch (MalformedURLException ignored) {}
-//            return new Image(Optional.ofNullable(url).map(URL::toString).orElse(null), "screen");
-//        });
-
-//        availability - только для флажка, можно и вообще отказаться, если выделять строку жирным по условию
+        grid.addComponentColumn(gameDTO -> {
+            Checkbox checkbox = new Checkbox(gameDTO.isAvailability());
+            checkbox.setEnabled(false);
+            return checkbox;}
+        ).setHeader("✔").setWidth("1em");
 
         filter.setPlaceholder("Filter by name (like ignore case)");
         filter.setSuffixComponent(new Label("Press ALT + 1 to focus"));
