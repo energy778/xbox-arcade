@@ -301,26 +301,4 @@ public class GameEditor extends VerticalLayout implements KeyNotifier {
                 .orElse(""));
     }
 
-    private void refreshScreen2(Tabs.SelectedChangeEvent selectedChangeEvent) {
-        Tab selectedTab = selectedChangeEvent.getSelectedTab();
-        if (selectedTab == null || selectedTab.getLabel() == null) {
-            currentScreen.setSrc("");
-            return;
-        }
-
-        Optional<String> picUrlOpt = Stream.ofNullable(currentGame)
-                .map(GameWithDetailsDTO::getScreens)
-                .flatMap(Collection::stream)
-                .filter(gameScreen -> selectedTab.getLabel().equals(gameScreen.getName()))
-                .map(GameWithDetailsDTO.GameScreenDTO::getUrl)
-                .findAny();
-        if (picUrlOpt.isEmpty())
-            currentScreen.setSrc("");
-        else {
-            try {
-                currentScreen.setSrc(new URL(picUrlOpt.get()).toString());
-            } catch (MalformedURLException ignored) {}
-        }
-    }
-
 }
