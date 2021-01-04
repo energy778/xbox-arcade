@@ -5,11 +5,15 @@ import com.vaadin.flow.component.KeyNotifier;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.datepicker.DatePicker;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.IntegerField;
+import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.textfield.TextFieldVariant;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
@@ -17,12 +21,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import ru.veretennikov.dto.GameWithDetailsDTO;
 import ru.veretennikov.service.GameService;
 
+import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
 
 @SpringComponent
 @UIScope
 public class GameEditor extends VerticalLayout implements KeyNotifier {
+
+    public static final Locale DATE_PICKER_LOCALE = new Locale("ru");
+    public static final DatePicker.DatePickerI18n DATE_PICKER_I18N = new DatePicker.DatePickerI18n()
+            .setWeek("Неделя").setCalendar("Календарь").setClear("Очистить").setToday("Сегодня").setCancel("Отмена").setFirstDayOfWeek(1)
+            .setMonthNames(Arrays.asList("Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"))
+            .setWeekdays(Arrays.asList("Воскресенье", "Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"))
+            .setWeekdaysShort(Arrays.asList("вс", "пн", "вт", "ср", "чт", "пт", "сб"));
 
     private final GameService service;
 
@@ -37,8 +51,8 @@ public class GameEditor extends VerticalLayout implements KeyNotifier {
     TextField gameUrlField = new TextField("Game url");
     TextField picUrlField = new TextField("Pic url");
     DatePicker releaseDateField = new DatePicker("Release date");
-    TextField description1Field = new TextField("Description 1");
-    TextField description2Field = new TextField("Description 2");
+    TextArea description1Field = new TextArea("Description 1");
+    TextArea description2Field = new TextArea("Description 2");
     TextField ratingField = new TextField("Rating");
     IntegerField priceField = new IntegerField("Price");
     TextField locationField = new TextField("Location");
@@ -53,7 +67,7 @@ public class GameEditor extends VerticalLayout implements KeyNotifier {
     Button delete = new Button("Delete", VaadinIcon.TRASH.create());
     HorizontalLayout actions = new HorizontalLayout(save, cancel, delete);
 
-    Binder<GameWithDetailsDTO> binder = new Binder<>(GameWithDetailsDTO.class);
+    Binder<GameWithDetailsDTO> binder = new Binder<>();
     private ChangeHandler changeHandler;
 
     @Autowired
@@ -79,10 +93,74 @@ public class GameEditor extends VerticalLayout implements KeyNotifier {
     }
 
     private void initFields() {
-        add(idField, nameField, gameUrlField, picUrlField, releaseDateField, description1Field,
-                description2Field, ratingField, priceField, locationField, availabilityField,
-                dateIssueField, developerField, publisherField,
-                actions);
+
+        idField.setWidth("31em");
+        idField.setClearButtonVisible(true);
+        nameField.setWidth("31em");
+        nameField.setClearButtonVisible(true);
+
+        gameUrlField.setWidth("31em");
+        gameUrlField.setClearButtonVisible(true);
+        picUrlField.setWidth("31em");
+        picUrlField.setClearButtonVisible(true);
+
+        description1Field.setWidth("100em");
+        description1Field.setClearButtonVisible(true);
+        description2Field.setWidth("100em");
+        description2Field.setClearButtonVisible(true);
+
+        ratingField.setWidth("15em");
+        ratingField.setClearButtonVisible(true);
+        priceField.setWidth("15em");
+        priceField.setHasControls(true);
+        priceField.addThemeVariants(TextFieldVariant.LUMO_ALIGN_CENTER);
+        priceField.setSuffixComponent(new Label("₽"));
+        priceField.setMin(0);
+
+        locationField.setWidth("31em");
+        locationField.setClearButtonVisible(true);
+
+        Div dateReleaseMessage = new Div();
+        releaseDateField.setWidthFull();
+        releaseDateField.setClearButtonVisible(true);
+        releaseDateField.setWeekNumbersVisible(true);
+        releaseDateField.setI18n(DATE_PICKER_I18N);
+        releaseDateField.setLocale(DATE_PICKER_LOCALE);
+        releaseDateField.addValueChangeListener(event -> dateReleaseMessage.setText(getMessageI18nRU(event.getValue(), releaseDateField.getI18n())));
+        VerticalLayout vlReleaseDate = new VerticalLayout(releaseDateField, dateReleaseMessage);
+        vlReleaseDate.setWidth("15em");
+
+        Div dateIssueMessage = new Div();
+        dateIssueField.setWidthFull();
+        dateIssueField.setClearButtonVisible(true);
+        dateIssueField.setWeekNumbersVisible(true);
+        dateIssueField.setI18n(DATE_PICKER_I18N);
+        dateIssueField.setLocale(DATE_PICKER_LOCALE);
+        dateIssueField.addValueChangeListener(event -> dateIssueMessage.setText(getMessageI18nRU(event.getValue(), dateIssueField.getI18n())));
+        VerticalLayout vlDateIssue = new VerticalLayout(dateIssueField, dateIssueMessage);
+        vlDateIssue.setWidth("15em");
+
+        developerField.setWidth("15em");
+        developerField.setClearButtonVisible(true);
+        publisherField.setWidth("15em");
+        publisherField.setClearButtonVisible(true);
+
+        add(idField,
+            nameField,
+            gameUrlField,
+            picUrlField,
+            description1Field,
+            description2Field,
+            new HorizontalLayout(ratingField, priceField),
+            locationField,
+            availabilityField,
+            new HorizontalLayout(vlReleaseDate, vlDateIssue),
+            new HorizontalLayout(developerField, publisherField),
+            actions);
+
+//        поле картинки игры
+//        плюс поля вывода списка жанра - только для чтения + байндер
+//        плюс картинки по вкладкам
     }
 
     @SuppressWarnings("DuplicatedCode")
@@ -148,6 +226,19 @@ public class GameEditor extends VerticalLayout implements KeyNotifier {
         // ChangeHandler is notified when either save or delete
         // is clicked
         changeHandler = h;
+    }
+
+    private String getMessageI18nRU(LocalDate selectedDate, DatePicker.DatePickerI18n datePickerI18n) {
+        if (selectedDate == null)
+            return "Дата не выбрана";
+
+        int weekday = selectedDate.getDayOfWeek().getValue() % 7;
+        String weekdayName = datePickerI18n.getWeekdays().get(weekday);
+
+        int month = selectedDate.getMonthValue() - 1;
+        String monthName = datePickerI18n.getMonthNames().get(month);
+
+        return "День недели: " + weekdayName + ", месяц: " + monthName;
     }
 
 }

@@ -1,7 +1,10 @@
 package ru.veretennikov.view;
 
+import com.vaadin.flow.component.Key;
+import com.vaadin.flow.component.KeyModifier;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -40,8 +43,8 @@ public class MainView extends VerticalLayout {
         add(actions, grid, editor);
 
         grid.setHeight("300px");
-        grid.setColumns("name", "picUrl", "releaseDate", "rating", "price", "availability", "developer", "publisher");
-        grid.getColumnByKey("name").setWidth("50px");
+        grid.setColumns("name", "releaseDate", "rating", "price", "availability", "developer", "publisher");
+        grid.getColumnByKey("name").setWidth("17em");
 
 //        grid.addColumn(item -> "").setKey("rowIndex")
 //                .setHeader("№")
@@ -49,12 +52,25 @@ public class MainView extends VerticalLayout {
 //        grid.getColumnByKey("rowIndex").getElement()
 //                .executeJs("this.renderer = function(root, column, rowData) {root.textContent = rowData.index + 1}");
 
+//        grid.addComponentColumn(gameDTO -> {
+//            URL url = null;
+//            try {
+//                url = new URL(gameDTO.getPicUrl());
+//            } catch (MalformedURLException ignored) {}
+//            return new Image(Optional.ofNullable(url).map(URL::toString).orElse(null), "screen");
+//        });
+
+//        availability - только для флажка, можно и вообще отказаться, если выделять строку жирным по условию
+
         filter.setPlaceholder("Filter by name (like ignore case)");
+        filter.setSuffixComponent(new Label("Press ALT + 1 to focus"));
+        filter.setWidth("31em");
 
         // Hook logic to components
 
         // Replace listing with filtered content when user changes filter
-        filter.setValueChangeMode(ValueChangeMode.EAGER);
+        filter.setValueChangeMode(ValueChangeMode.LAZY);
+        filter.addFocusShortcut(Key.DIGIT_1, KeyModifier.ALT);
         filter.addValueChangeListener(e -> {
             editor.setVisible(false);
             refreshGridSource(e.getValue());
