@@ -70,6 +70,7 @@ public class MainView extends VerticalLayout {
 
         filter.setPlaceholder("Filter by name (like ignore case)");
         filter.setSuffixComponent(new Label("Press ALT + 1 to focus"));
+        filter.setClearButtonVisible(true);
         filter.setWidth("31em");
 
         // Hook logic to components

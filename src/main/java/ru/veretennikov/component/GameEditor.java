@@ -64,10 +64,11 @@ public class GameEditor extends VerticalLayout implements KeyNotifier {
     Checkbox availabilityField = new Checkbox("Availability");
     DatePicker dateIssueField = new DatePicker("Date issue");
     TextField developerField = new TextField("Developer");
-    Image pic = new Image();
     TextField publisherField = new TextField("Publisher");
-    Tabs tabs = new Tabs();
+    Image pic = new Image();
     Image currentScreen = new Image();
+    Tabs screenTabs = new Tabs();
+    Tabs genresTabs = new Tabs();
 
     /* Action buttons */
     Button save = new Button("Save", VaadinIcon.CHECK.create());
@@ -152,10 +153,14 @@ public class GameEditor extends VerticalLayout implements KeyNotifier {
         publisherField.setWidth("15em");
         publisherField.setClearButtonVisible(true);
 
-        tabs.setAutoselect(false);
-        tabs.setFlexGrowForEnclosedTabs(1);
-        tabs.addSelectedChangeListener(this::refreshScreen);
+        screenTabs.setAutoselect(false);
+        screenTabs.setFlexGrowForEnclosedTabs(1);
+        screenTabs.addSelectedChangeListener(this::refreshScreenshot);
 
+        genresTabs.setEnabled(false);
+        genresTabs.setAutoselect(false);
+        genresTabs.setFlexGrowForEnclosedTabs(1);
+        genresTabs.setOrientation(Tabs.Orientation.VERTICAL);
 
         /* grouping */
         Details descriptionDetails = new Details("Description", new FormLayout(new VerticalLayout(description1Field, description2Field)));
@@ -164,9 +169,9 @@ public class GameEditor extends VerticalLayout implements KeyNotifier {
                 new HorizontalLayout(developerField, publisherField),
                 new HorizontalLayout(vlReleaseDate, vlDateIssue)
         ));
-        Details screensDetails = new Details("Screenshots", new VerticalLayout(tabs, currentScreen));
+        Details screensDetails = new Details("Screenshots", new VerticalLayout(screenTabs, currentScreen));
 
-        add(pic,
+        add(new HorizontalLayout(pic, genresTabs),
             new FormLayout(idField, nameField, gameUrlField, locationField),
             availabilityField,
             descriptionDetails,
@@ -185,6 +190,7 @@ public class GameEditor extends VerticalLayout implements KeyNotifier {
                 (newValue, id) ->
                         newValue.setId(Optional.ofNullable(id)
                                 .filter(s -> !s.isBlank())
+                                // TODO: 04.01.21 need UUID validation and restore previous value
                                 .map(UUID::fromString)
                                 .orElse(null)));
         binder.bind(nameField, GameWithDetailsDTO::getName, GameWithDetailsDTO::setName);
@@ -221,6 +227,7 @@ public class GameEditor extends VerticalLayout implements KeyNotifier {
 
         final boolean persisted = currentGame != null;
 
+        initGenresTabs();
         refreshPic();
         currentScreen.setSrc("");
         initScreenTabs();
@@ -274,15 +281,24 @@ public class GameEditor extends VerticalLayout implements KeyNotifier {
     }
 
     private void initScreenTabs() {
-        tabs.removeAll();
+        screenTabs.removeAll();
         Stream.ofNullable(currentGame)
                 .map(GameWithDetailsDTO::getScreens)
                 .filter(Objects::nonNull)
                 .flatMap(Collection::stream)
-                .forEach(gameScreen -> tabs.add(new Tab(gameScreen.getName())));
+                .forEach(gameScreen -> screenTabs.add(new Tab(gameScreen.getName())));
     }
 
-    private void refreshScreen(Tabs.SelectedChangeEvent selectedChangeEvent) {
+    private void initGenresTabs() {
+        genresTabs.removeAll();
+        Stream.ofNullable(currentGame)
+                .map(GameWithDetailsDTO::getGenres)
+                .filter(Objects::nonNull)
+                .flatMap(Collection::stream)
+                .forEach(gameGenre -> genresTabs.add(new Tab(gameGenre.getName())));
+    }
+
+    private void refreshScreenshot(Tabs.SelectedChangeEvent selectedChangeEvent) {
         currentScreen.setSrc(Optional.ofNullable(currentGame)
                 .map(game -> Stream.ofNullable(game.getScreens())
                         .flatMap(Collection::stream)
