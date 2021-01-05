@@ -46,7 +46,13 @@ public class MainView extends VerticalLayout {
 
         // build layout
         setHeightFull();
-        HorizontalLayout actions = new HorizontalLayout(filter, addNewBtn);
+        Checkbox allowEdit = new Checkbox("Allow edit game", event -> {
+            addNewBtn.setVisible(event.getValue());
+            gameEditDialog.setEditable(event.getValue());
+        });
+        addNewBtn.setVisible(false);    allowEdit.setVisible(false);    // TODO: 05.01.21 until security don`t have
+        HorizontalLayout actions = new HorizontalLayout(filter, addNewBtn, allowEdit);
+        actions.setVerticalComponentAlignment(Alignment.CENTER, allowEdit);
         add(actions, grid);
 
         grid.removeAllColumns();
@@ -109,6 +115,8 @@ public class MainView extends VerticalLayout {
 
         // Initialize listing
         refreshGridSource(null);
+
+        gameEditDialog.setEditable(allowEdit.getValue());
 
     }
 

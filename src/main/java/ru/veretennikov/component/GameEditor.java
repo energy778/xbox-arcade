@@ -264,6 +264,11 @@ public class GameEditor extends VerticalLayout implements KeyNotifier {
         deleteHandler = h;
     }
 
+    public void setEditable(boolean newValue) {
+        binder.setReadOnly(!newValue);
+        actions.setVisible(newValue);
+    }
+
     private String getMessageI18nRU(LocalDate selectedDate, DatePicker.DatePickerI18n datePickerI18n) {
         if (selectedDate == null)
             return "Дата не выбрана";

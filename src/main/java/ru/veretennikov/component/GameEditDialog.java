@@ -35,4 +35,8 @@ public class GameEditDialog extends Dialog {
         });
     }
 
+    public void setEditable(boolean newValue) {
+        editor.setEditable(newValue);
+    }
+
 }
