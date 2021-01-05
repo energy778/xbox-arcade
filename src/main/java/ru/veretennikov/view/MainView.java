@@ -15,11 +15,11 @@ import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.Route;
-import org.springframework.util.ObjectUtils;
 import ru.veretennikov.component.GameEditDialog;
 import ru.veretennikov.component.GameEditor;
 import ru.veretennikov.dto.GameDTO;
-import ru.veretennikov.service.GameService;
+import ru.veretennikov.service.GameDataProviderHasCallbackCount;
+import ru.veretennikov.service.GameDataProviderHasCallbackFetch;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -29,7 +29,8 @@ import java.util.Optional;
 public class MainView extends VerticalLayout {
 
 //    region fields
-    private final GameService gameService;
+    private final GameDataProviderHasCallbackFetch hasCallbackFetch;
+    private final GameDataProviderHasCallbackCount hasCallbackCount;
 //    endregion
 
 //    region components
@@ -37,12 +38,15 @@ public class MainView extends VerticalLayout {
     final TextField filter;
     final Button addNewBtn;
     private final GameEditDialog gameEditDialog;
-    private CallbackDataProvider<GameDTO, Void> lazyDataProvider;
     private Checkbox allowEdit;
+    private CallbackDataProvider<GameDTO, Void> lazyDataProvider;
 //    endregion
 
-    public MainView(GameService gameService, GameEditor editor) {
-        this.gameService = gameService;
+    public MainView(GameEditor editor,
+                    GameDataProviderHasCallbackFetch hasCallbackFetch,
+                    GameDataProviderHasCallbackCount hasCallbackCount) {
+        this.hasCallbackFetch = hasCallbackFetch;
+        this.hasCallbackCount = hasCallbackCount;
         this.gameEditDialog = new GameEditDialog(editor);
         this.grid = new Grid<>(GameDTO.class);
         this.filter = new TextField();
@@ -64,7 +68,7 @@ public class MainView extends VerticalLayout {
     }
 
     private void gridInit() {
-        lazyDataProvider = DataProvider.fromCallbacks(getFetchCallback(), getCountCallback());
+        lazyDataProvider = DataProvider.fromCallbacks(hasCallbackFetch.get(), hasCallbackCount.get());
         grid.setDataProvider(lazyDataProvider);
 
         grid.removeAllColumns();
@@ -123,33 +127,17 @@ public class MainView extends VerticalLayout {
         // Replace listing with filtered content when user changes filter
         filter.setValueChangeMode(ValueChangeMode.LAZY);
         filter.addFocusShortcut(Key.DIGIT_1, KeyModifier.ALT);
-        filter.addValueChangeListener(e -> refreshGridSource());
+        filter.addValueChangeListener(e -> {
+            hasCallbackFetch.setLike(e.getValue());
+            hasCallbackCount.setLike(e.getValue());
+            refreshGridSource();
+        });
 
         // Instantiate and edit new Game the new button is clicked
         addNewBtn.addClickListener(e -> {
             gameEditDialog.setIdCurrentGame(null);
             gameEditDialog.open();
         });
-    }
-
-    private CallbackDataProvider.FetchCallback<GameDTO, Void> getFetchCallback() {
-        return query -> {
-            String like = filter.getValue();
-            if (ObjectUtils.isEmpty(like))
-                return gameService.fetch(query.getOffset(), query.getLimit()).stream();
-            else
-                return gameService.fetch(like, query.getOffset(), query.getLimit()).stream();
-        };
-    }
-
-    private CallbackDataProvider.CountCallback<GameDTO, Void> getCountCallback() {
-        return query -> {
-            String like = filter.getValue();
-            if (ObjectUtils.isEmpty(like))
-                return (int) gameService.count();
-            else
-                return (int) gameService.count(like);
-        };
     }
 
     void refreshGridSource() {
