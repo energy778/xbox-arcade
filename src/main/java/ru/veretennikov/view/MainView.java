@@ -15,6 +15,7 @@ import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.Route;
+import org.springframework.beans.factory.annotation.Qualifier;
 import ru.veretennikov.component.GameEditDialog;
 import ru.veretennikov.component.GameEditor;
 import ru.veretennikov.dto.GameDTO;
@@ -40,7 +41,7 @@ public class MainView extends VerticalLayout {
     private CallbackDataProvider<GameDTO, Void> lazyDataProvider;
 //    endregion
 
-    public MainView(GameEditor editor, GameCallbackProvider gameCallbackProvider) {
+    public MainView(GameEditor editor, @Qualifier("gameCallbackProviderBasic") GameCallbackProvider gameCallbackProvider) {
         this.gameCallbackProvider = gameCallbackProvider;
         this.gameEditDialog = new GameEditDialog(editor);
         this.grid = new Grid<>(GameDTO.class);
