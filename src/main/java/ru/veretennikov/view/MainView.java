@@ -18,8 +18,7 @@ import com.vaadin.flow.router.Route;
 import ru.veretennikov.component.GameEditDialog;
 import ru.veretennikov.component.GameEditor;
 import ru.veretennikov.dto.GameDTO;
-import ru.veretennikov.service.GameDataProviderHasCallbackCount;
-import ru.veretennikov.service.GameDataProviderHasCallbackFetch;
+import ru.veretennikov.service.GameCallbackProvider;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -29,8 +28,7 @@ import java.util.Optional;
 public class MainView extends VerticalLayout {
 
 //    region fields
-    private final GameDataProviderHasCallbackFetch hasCallbackFetch;
-    private final GameDataProviderHasCallbackCount hasCallbackCount;
+    private final GameCallbackProvider gameCallbackProvider;
 //    endregion
 
 //    region components
@@ -42,11 +40,8 @@ public class MainView extends VerticalLayout {
     private CallbackDataProvider<GameDTO, Void> lazyDataProvider;
 //    endregion
 
-    public MainView(GameEditor editor,
-                    GameDataProviderHasCallbackFetch hasCallbackFetch,
-                    GameDataProviderHasCallbackCount hasCallbackCount) {
-        this.hasCallbackFetch = hasCallbackFetch;
-        this.hasCallbackCount = hasCallbackCount;
+    public MainView(GameEditor editor, GameCallbackProvider gameCallbackProvider) {
+        this.gameCallbackProvider = gameCallbackProvider;
         this.gameEditDialog = new GameEditDialog(editor);
         this.grid = new Grid<>(GameDTO.class);
         this.filter = new TextField();
@@ -68,7 +63,7 @@ public class MainView extends VerticalLayout {
     }
 
     private void gridInit() {
-        lazyDataProvider = DataProvider.fromCallbacks(hasCallbackFetch.get(), hasCallbackCount.get());
+        lazyDataProvider = DataProvider.fromCallbacks(gameCallbackProvider.getFetchCallback(), gameCallbackProvider.getCountCallback());
         grid.setDataProvider(lazyDataProvider);
 
         grid.removeAllColumns();
@@ -128,8 +123,7 @@ public class MainView extends VerticalLayout {
         filter.setValueChangeMode(ValueChangeMode.LAZY);
         filter.addFocusShortcut(Key.DIGIT_1, KeyModifier.ALT);
         filter.addValueChangeListener(e -> {
-            hasCallbackFetch.setLike(e.getValue());
-            hasCallbackCount.setLike(e.getValue());
+            gameCallbackProvider.setLike(e.getValue());
             refreshGridSource();
         });
 
