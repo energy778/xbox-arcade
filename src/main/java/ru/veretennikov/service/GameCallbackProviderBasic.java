@@ -6,11 +6,11 @@ import org.springframework.util.ObjectUtils;
 import ru.veretennikov.dto.GameDTO;
 
 @Service
-public class GameBasicCallbackProvider extends GameCallbackProvider {
+public class GameCallbackProviderBasic extends GameCallbackProvider {
 
     private final GameService gameService;
 
-    public GameBasicCallbackProvider(GameService gameService) {
+    public GameCallbackProviderBasic(GameService gameService) {
         this.gameService = gameService;
     }
 

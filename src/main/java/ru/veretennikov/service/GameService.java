@@ -1,5 +1,7 @@
 package ru.veretennikov.service;
 
+import org.springframework.data.jpa.domain.Specification;
+import ru.veretennikov.domain.Game;
 import ru.veretennikov.dto.GameDTO;
 import ru.veretennikov.dto.GameWithDetailsDTO;
 
@@ -20,6 +22,8 @@ public interface GameService {
 
     List<GameDTO> fetch(int offset, int limit);
     List<GameDTO> fetch(String like, int offset, int limit);
+    List<GameDTO> fetch(Specification<Game> specification, int offset, int limit);
     long count();
     long count(String like);
+    long count(Specification<Game> specification);
 }

@@ -1,5 +1,7 @@
 package ru.veretennikov.service;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.veretennikov.domain.Game;
@@ -105,12 +107,17 @@ public class GameServiceImpl implements GameService {
 
     @Override
     public long count() {
-        return repository.findAll().size();
+        return repository.count();
     }
 
     @Override
     public long count(String like) {
         return repository.findAllByNameLike(like).size();
+    }
+
+    @Override
+    public long count(Specification<Game> specification) {
+        return repository.count(specification);
     }
 
     @Override
@@ -123,6 +130,15 @@ public class GameServiceImpl implements GameService {
     @Override
     public List<GameDTO> fetch(String like, int offset, int limit) {
         return repository.findAllByNameLike(like, new OffsetBasedPageRequest(offset, limit)).stream()
+                .map(this::buildDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<GameDTO> fetch(Specification<Game> specification, int offset, int limit) {
+        OffsetBasedPageRequest pageRequest = new OffsetBasedPageRequest(offset, limit);
+        Page<Game> page = repository.findAll(specification, pageRequest);
+        return page.get()
                 .map(this::buildDTO)
                 .collect(Collectors.toList());
     }
