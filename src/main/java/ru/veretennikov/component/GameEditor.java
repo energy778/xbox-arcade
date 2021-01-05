@@ -78,6 +78,7 @@ public class GameEditor extends VerticalLayout implements KeyNotifier {
 
     Binder<GameWithDetailsDTO> binder = new Binder<>();
     private ChangeHandler changeHandler;
+    private ChangeHandler deleteHandler;
 
     @Autowired
     public GameEditor(GameService service) {
@@ -170,6 +171,7 @@ public class GameEditor extends VerticalLayout implements KeyNotifier {
                 new HorizontalLayout(vlReleaseDate, vlDateIssue)
         ));
         Details screensDetails = new Details("Screenshots", new VerticalLayout(screenTabs, currentScreen));
+        screensDetails.setOpened(true);
 
         add(new HorizontalLayout(pic, genresTabs),
             new FormLayout(idField, nameField, gameUrlField, locationField),
@@ -216,7 +218,7 @@ public class GameEditor extends VerticalLayout implements KeyNotifier {
 
     void delete() {
         service.delete(currentGame.getId());
-        changeHandler.onChange();
+        deleteHandler.onChange();
     }
 
     public final void editGame(UUID id) {
@@ -254,6 +256,12 @@ public class GameEditor extends VerticalLayout implements KeyNotifier {
         // ChangeHandler is notified when either save or delete
         // is clicked
         changeHandler = h;
+    }
+
+    public void setDeleteHandler(ChangeHandler h) {
+        // ChangeHandler is notified when either save or delete
+        // is clicked
+        deleteHandler = h;
     }
 
     private String getMessageI18nRU(LocalDate selectedDate, DatePicker.DatePickerI18n datePickerI18n) {
