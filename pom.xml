@@ -11,7 +11,7 @@
 	<groupId>ru.veretennikov</groupId>
 	<artifactId>xbox-arcade</artifactId>
 	<version>1.0.0</version>
-	<packaging>war</packaging>
+	<packaging>jar</packaging>
 	<name>xbox-arcade</name>
 
 	<properties>
