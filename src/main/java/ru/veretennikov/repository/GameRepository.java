@@ -1,5 +1,6 @@
 package ru.veretennikov.repository;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -42,5 +43,10 @@ public interface GameRepository extends JpaRepository<Game, UUID> {
             "FROM Game g " +
             "WHERE lower(g.name) like lower(concat('%', :name, '%'))")
     List<Game> findAllByNameLike(@Param("name") String name);
+
+    @Query(value = "SELECT g " +
+            "FROM Game g " +
+            "WHERE lower(g.name) like lower(concat('%', :name, '%'))")
+    List<Game> findAllByNameLike(@Param("name") String name, Pageable request);
 
 }

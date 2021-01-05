@@ -10,6 +10,7 @@ import ru.veretennikov.dto.GameWithDetailsDTO;
 import ru.veretennikov.repository.GameGenreRepository;
 import ru.veretennikov.repository.GameRepository;
 import ru.veretennikov.repository.GameScreenRepository;
+import ru.veretennikov.util.db.OffsetBasedPageRequest;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -100,6 +101,30 @@ public class GameServiceImpl implements GameService {
         Game game = repository.save(gameForSave);
 
         return buildDTOWithDetails(game);
+    }
+
+    @Override
+    public long count() {
+        return repository.findAll().size();
+    }
+
+    @Override
+    public long count(String like) {
+        return repository.findAllByNameLike(like).size();
+    }
+
+    @Override
+    public List<GameDTO> fetch(int offset, int limit) {
+        return repository.findAll(new OffsetBasedPageRequest(offset, limit)).stream()
+                .map(this::buildDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<GameDTO> fetch(String like, int offset, int limit) {
+        return repository.findAllByNameLike(like, new OffsetBasedPageRequest(offset, limit)).stream()
+                .map(this::buildDTO)
+                .collect(Collectors.toList());
     }
 
 

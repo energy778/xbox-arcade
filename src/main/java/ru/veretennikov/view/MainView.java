@@ -11,6 +11,8 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.provider.CallbackDataProvider;
+import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.Route;
 import org.springframework.util.ObjectUtils;
@@ -35,6 +37,8 @@ public class MainView extends VerticalLayout {
     final TextField filter;
     final Button addNewBtn;
     private final GameEditDialog gameEditDialog;
+    private CallbackDataProvider<GameDTO, Void> lazyDataProvider;
+    private Checkbox allowEdit;
 //    endregion
 
     public MainView(GameService gameService, GameEditor editor) {
@@ -44,16 +48,24 @@ public class MainView extends VerticalLayout {
         this.filter = new TextField();
         this.addNewBtn = new Button("New game", VaadinIcon.PLUS.create());
 
+        gridInit();
+        actionsInit();
+
         // build layout
         setHeightFull();
-        Checkbox allowEdit = new Checkbox("Allow edit game", event -> {
-            addNewBtn.setVisible(event.getValue());
-            gameEditDialog.setEditable(event.getValue());
-        });
-        addNewBtn.setVisible(false);    allowEdit.setVisible(false);    // TODO: 05.01.21 until security don`t have
         HorizontalLayout actions = new HorizontalLayout(filter, addNewBtn, allowEdit);
         actions.setVerticalComponentAlignment(Alignment.CENTER, allowEdit);
         add(actions, grid);
+
+        // Initialize listing
+        gameEditDialog.setEditable(allowEdit.getValue());
+
+        refreshGridSource();
+    }
+
+    private void gridInit() {
+        lazyDataProvider = DataProvider.fromCallbacks(getFetchCallback(), getCountCallback());
+        grid.setDataProvider(lazyDataProvider);
 
         grid.removeAllColumns();
 
@@ -86,45 +98,62 @@ public class MainView extends VerticalLayout {
             return checkbox;}
         ).setHeader("✔").setWidth("1em");
 
+        grid.addItemDoubleClickListener(selectionEvent -> {
+            gameEditDialog.setIdCurrentGame(selectionEvent.getItem().getId());
+            gameEditDialog.open();
+        });
+
+        // Listen changes made by the edit dialog, refresh data from backend
+        gameEditDialog.setChangeHandler(this::refreshGridSource);
+        gameEditDialog.setDeleteHandler(this::refreshGridSource);
+    }
+
+    private void actionsInit() {
+        allowEdit = new Checkbox("Allow edit game", event -> {
+            addNewBtn.setVisible(event.getValue());
+            gameEditDialog.setEditable(event.getValue());
+        });
+        addNewBtn.setVisible(false);    allowEdit.setVisible(false);    // TODO: 05.01.21 until security don`t have
+
         filter.setPlaceholder("Filter by name (like ignore case)");
         filter.setSuffixComponent(new Label("Press ALT + 1 to focus"));
         filter.setClearButtonVisible(true);
         filter.setWidth("31em");
 
-        // Hook logic to components
-
         // Replace listing with filtered content when user changes filter
         filter.setValueChangeMode(ValueChangeMode.LAZY);
         filter.addFocusShortcut(Key.DIGIT_1, KeyModifier.ALT);
-        filter.addValueChangeListener(e -> refreshGridSource(e.getValue()));
-
-        grid.addItemDoubleClickListener(selectionEvent -> {
-            gameEditDialog.setIdCurrentGame(selectionEvent.getItem().getId());
-            gameEditDialog.open();
-        });
+        filter.addValueChangeListener(e -> refreshGridSource());
 
         // Instantiate and edit new Game the new button is clicked
         addNewBtn.addClickListener(e -> {
             gameEditDialog.setIdCurrentGame(null);
             gameEditDialog.open();
         });
-
-        // Listen changes made by the edit dialog, refresh data from backend
-        gameEditDialog.setChangeHandler(() -> refreshGridSource(filter.getValue()));
-        gameEditDialog.setDeleteHandler(() -> refreshGridSource(filter.getValue()));
-
-        // Initialize listing
-        refreshGridSource(null);
-
-        gameEditDialog.setEditable(allowEdit.getValue());
-
     }
 
-    void refreshGridSource(String filterText) {
-        if (ObjectUtils.isEmpty(filterText))
-            grid.setItems(gameService.getAll());
-        else
-            grid.setItems(gameService.getAllByNameLike(filterText));
+    private CallbackDataProvider.FetchCallback<GameDTO, Void> getFetchCallback() {
+        return query -> {
+            String like = filter.getValue();
+            if (ObjectUtils.isEmpty(like))
+                return gameService.fetch(query.getOffset(), query.getLimit()).stream();
+            else
+                return gameService.fetch(like, query.getOffset(), query.getLimit()).stream();
+        };
+    }
+
+    private CallbackDataProvider.CountCallback<GameDTO, Void> getCountCallback() {
+        return query -> {
+            String like = filter.getValue();
+            if (ObjectUtils.isEmpty(like))
+                return (int) gameService.count();
+            else
+                return (int) gameService.count(like);
+        };
+    }
+
+    void refreshGridSource() {
+        lazyDataProvider.refreshAll();
     }
 
 }

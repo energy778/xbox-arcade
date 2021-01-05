@@ -17,4 +17,9 @@ public interface GameService {
 
     void delete(UUID id);
     GameWithDetailsDTO save(GameWithDetailsDTO currentGame);
+
+    List<GameDTO> fetch(int offset, int limit);
+    List<GameDTO> fetch(String like, int offset, int limit);
+    long count();
+    long count(String like);
 }
