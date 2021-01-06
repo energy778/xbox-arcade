@@ -11,3 +11,5 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     properties:
       format_sql: true
+server:
+  port: ${PORT:0}

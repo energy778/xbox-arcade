@@ -1,1 +1,1 @@
-web: java $JAVA_OPTS -jar target/xbox-arcade-1.0.0.jar -Dserver.port=$PORT
+web: java $JAVA_OPTS -jar target/*.war
