@@ -1,1 +1,1 @@
-web: npm install; java $JAVA_OPTS -jar target/*.war -Dserver.port=$PORT -Pproduction
+web: npm audit fix; npm install; java $JAVA_OPTS -jar target/*.war -Dserver.port=$PORT -Pproduction
