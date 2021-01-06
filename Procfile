@@ -1,1 +1,1 @@
-web: java $JAVA_OPTS -jar target/*.war
+web: java -jar target/xbox-arcade-1.0.0.war
