@@ -13,3 +13,7 @@ spring:
       format_sql: true
 server:
   port: ${PORT:8080}
+vaadin:
+  pnpm:
+    enable: true
+#  pnpm-enabled: true
