@@ -1,1 +1,1 @@
-web: java $JAVA_OPTS -jar target/*.war -Dserver.port=$PORT
+web: npm install; java $JAVA_OPTS -jar target/*.war -Dserver.port=$PORT
