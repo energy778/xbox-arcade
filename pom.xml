@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>ru.veretennikov</groupId>
 	<artifactId>xbox-arcade</artifactId>
-	<version>1.0.0</version>
+	<version>1.0.1</version>
 	<packaging>war</packaging>
 	<name>xbox-arcade</name>
 
@@ -96,7 +96,7 @@
 		<dependency>
 			<groupId>com.vaadin</groupId>
 			<!-- Replace artifactId with vaadin-core to use only free components -->
-			<artifactId>vaadin</artifactId>
+			<artifactId>vaadin-core</artifactId>
 			<exclusions>
 				<!-- Webjars are only needed when running in Vaadin 13 compatibility mode -->
 				<exclusion>
