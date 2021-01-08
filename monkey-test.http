@@ -27,4 +27,5 @@ Accept: application/json
 
 ###
 GET https://xbox360arcade.herokuapp.com/info
-Accept: application/json
+#Authorization: Basic user passwd
+#Accept: application/json

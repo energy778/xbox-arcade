@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>ru.veretennikov</groupId>
 	<artifactId>xbox-arcade</artifactId>
-	<version>1.1</version>
+	<version>1.2</version>
 	<packaging>war</packaging>
 	<name>xbox-arcade</name>
 
@@ -91,6 +91,10 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
 		</dependency>
 <!--		VAADIN-->
 		<dependency>
