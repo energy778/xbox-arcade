@@ -13,3 +13,8 @@ Accept: application/json
 ### game with details
 GET http://localhost:8080/games/full/66acd000-77fe-1000-9115-d802584107ef
 Accept: application/json
+
+### ping
+GET http://localhost:8080/info
+Accept: application/json
+
