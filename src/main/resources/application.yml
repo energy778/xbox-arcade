@@ -13,4 +13,4 @@ spring:
       format_sql: true
 
 app:
-  info: version 1.1
+  info: добавлен querydsl
