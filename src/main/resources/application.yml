@@ -11,6 +11,9 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     properties:
       format_sql: true
+      hibernate:
+        order_by:
+          default_null_ordering: first
 
 app:
-  info: добавлены сортировки по колонкам
+  info: добавлены null хэндлеры (хотя для спецификаций и базовых запросов работает только установленное свойство "сортировка по умолчанию" в конфиге)

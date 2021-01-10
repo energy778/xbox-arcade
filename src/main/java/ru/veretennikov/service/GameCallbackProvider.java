@@ -36,29 +36,34 @@ public abstract class GameCallbackProvider {
                             || GameDTO.Fields.price.toString().equals(sorted)
                             || GameDTO.Fields.developer.toString().equals(sorted)
                             || GameDTO.Fields.publisher.toString().equals(sorted))
-                        return Stream.ofNullable(new Sort.Order(getSortDirection(item.getDirection()), item.getSorted()));
+                        return Stream.ofNullable(new Sort.Order(getSortDirection(item.getDirection()), item.getSorted(), getNullHandlingByDirection(item.getDirection())));
                     /* custom columns */
                     if ("pic".equals(sorted))
                         return addTypedSortDirection(typedSortTemplate.by((Game game) -> !ObjectUtils.isEmpty(game.getPicUrl())), item.getDirection()).get();
                     else if ("available".equals(sorted))
-                        return addTypedSortDirection(typedSortTemplate.by(Game::getAvailability), item.getDirection()).get();        // field type must be not primitive
+                        return addTypedSortDirection(typedSortTemplate.by((Game game) -> game.getAvailability() != null && game.getAvailability()), item.getDirection()).get();        // field type must be not primitive
                     else
                         return Stream.empty();
                 })
                 .toArray(Sort.Order[]::new));
 
-        if (sort.isUnsorted())
-            return Sort.by(new Sort.Order(Sort.Direction.ASC, GameDTO.Fields.name.toString()));
+        if (sort.isUnsorted() || sort.isEmpty())
+            return Sort.by(new Sort.Order(Sort.Direction.ASC, GameDTO.Fields.name.toString(), Sort.NullHandling.NULLS_FIRST));
 
         return sort;
     }
 
-    private Sort addTypedSortDirection(Sort.TypedSort<Boolean> currentTypedSort, SortDirection direction) {
+    private Sort addTypedSortDirection(Sort.TypedSort<?> currentTypedSort, SortDirection direction) {
         return SortDirection.DESCENDING.equals(direction) ? currentTypedSort.descending() : currentTypedSort.ascending();
     }
 
     private Sort.Direction getSortDirection(SortDirection direction) {
         return SortDirection.DESCENDING.equals(direction) ? Sort.Direction.DESC : Sort.Direction.ASC;
+    }
+
+    private Sort.NullHandling getNullHandlingByDirection(SortDirection direction) {
+//        https://stackoverflow.com/questions/3683174/hibernate-order-by-with-nulls-last
+        return SortDirection.DESCENDING.equals(direction) ? Sort.NullHandling.NULLS_LAST : Sort.NullHandling.NULLS_FIRST;
     }
 
 }

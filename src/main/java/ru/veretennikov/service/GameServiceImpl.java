@@ -144,21 +144,22 @@ public class GameServiceImpl implements GameService {
 
 
     private GameDTO buildDTO(Game game) {
+//        Vaadin model don't have null fields
         return GameDTO.builder()
-                .id(game.getId())
-                .name(game.getName())
-                .gameUrl(game.getGameUrl())
-                .picUrl(game.getPicUrl())
+                .id(Optional.ofNullable(game.getId()).orElse(UUID.fromString("00000000-0000-0000-0000-000000000000")))
+                .name(Optional.ofNullable(game.getName()).orElse(""))
+                .gameUrl(Optional.ofNullable(game.getGameUrl()).orElse(""))
+                .picUrl(Optional.ofNullable(game.getPicUrl()).orElse(""))
                 .releaseDate(game.getReleaseDate())
-                .description1(game.getDescription1())
-                .description2(game.getDescription2())
-                .rating(game.getRating())
-                .price(game.getPrice())
-                .location(game.getLocation())
-                .availability(game.getAvailability())
+                .description1(Optional.ofNullable(game.getDescription1()).orElse(""))
+                .description2(Optional.ofNullable(game.getDescription2()).orElse(""))
+                .rating(Optional.ofNullable(game.getRating()).orElse(""))
+                .price(Optional.ofNullable(game.getPrice()).orElse(0))
+                .location(Optional.ofNullable(game.getLocation()).orElse(""))
+                .availability(Optional.ofNullable(game.getAvailability()).orElse(false))
                 .dateIssue(game.getDateIssue())
-                .developer(game.getDeveloper())
-                .publisher(game.getPublisher())
+                .developer(Optional.ofNullable(game.getDeveloper()).orElse(""))
+                .publisher(Optional.ofNullable(game.getPublisher()).orElse(""))
                 .build();
     }
 

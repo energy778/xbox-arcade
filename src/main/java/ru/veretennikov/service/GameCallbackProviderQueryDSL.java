@@ -49,7 +49,7 @@ public class GameCallbackProviderQueryDSL extends GameCallbackProvider {
                         .description1(gameTuple.get(t_game.description1))
                         .description2(gameTuple.get(t_game.description2))
                         .rating(gameTuple.get(t_game.rating))
-                        .price(gameTuple.get(t_game.price))
+                        .price(Optional.ofNullable(gameTuple.get(t_game.price)).orElse(0))
                         .location(gameTuple.get(t_game.location))
                         .availability(Optional.ofNullable(gameTuple.get(t_game.availability)).orElse(false))
                         .dateIssue(gameTuple.get(t_game.dateIssue))
@@ -139,7 +139,7 @@ public class GameCallbackProviderQueryDSL extends GameCallbackProvider {
     }
 
     private <T extends ComparableExpressionBase<?>> Stream<OrderSpecifier<?>> getOrderSpecifierStream(T path, SortDirection direction) {
-        return SortDirection.DESCENDING.equals(direction) ? Stream.of(path.desc()) : Stream.of(path.asc());
+        return SortDirection.DESCENDING.equals(direction) ? Stream.of(path.desc().nullsLast()) : Stream.of(path.asc().nullsFirst());
     }
 
 }

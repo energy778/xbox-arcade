@@ -42,7 +42,7 @@ public class MainView extends VerticalLayout {
     private CallbackDataProvider<GameDTO, Void> lazyDataProvider;
 //    endregion
 
-    public MainView(GameEditor editor, @Qualifier("gameCallbackProviderBasic") GameCallbackProvider gameCallbackProvider) {
+    public MainView(GameEditor editor, @Qualifier("gameCallbackProviderQueryDSL") GameCallbackProvider gameCallbackProvider) {
         this.gameCallbackProvider = gameCallbackProvider;
         this.gameEditDialog = new GameEditDialog(editor);
         this.grid = new Grid<>(GameDTO.class);
