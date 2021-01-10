@@ -48,7 +48,7 @@ public class Game {
     private String location;
 
     @Column(name = Meta.game.fields.availability, nullable = false)
-    private boolean availability;
+    private Boolean availability;
 
     @Column(name = Meta.game.fields.date_issue)
     private LocalDate dateIssue;

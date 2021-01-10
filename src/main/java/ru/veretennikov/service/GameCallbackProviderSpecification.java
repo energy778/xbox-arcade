@@ -1,10 +1,10 @@
 package ru.veretennikov.service;
 
 import com.vaadin.flow.data.provider.CallbackDataProvider;
-import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 import ru.veretennikov.domain.Game;
 import ru.veretennikov.dto.GameDTO;
 import ru.veretennikov.repository.GameSpecification;
@@ -24,7 +24,7 @@ public class GameCallbackProviderSpecification extends GameCallbackProvider {
     @Override
     public CallbackDataProvider.CountCallback<GameDTO, Void> getCountCallback() {
         return query -> {
-            initFilters();
+            initSpecification();
             return (int) gameService.count(specification);
         };
     }
@@ -32,14 +32,14 @@ public class GameCallbackProviderSpecification extends GameCallbackProvider {
     @Override
     public CallbackDataProvider.FetchCallback<GameDTO, Void> getFetchCallback() {
         return query -> {
-            initFilters();
-            return gameService.fetch(specification, query.getOffset(), query.getLimit()).stream();
+            initSpecification();
+            return gameService.fetch(specification, query.getOffset(), query.getLimit(), getSort(query.getSortOrders())).stream();
         };
     }
 
-    private void initFilters() {
+    private void initSpecification() {
         Specification<Game> newSpec = GameSpecification.getEmpty();
-        if (ObjectUtils.isNotEmpty(like))
+        if (!ObjectUtils.isEmpty(like))
             newSpec = newSpec.and(GameSpecification.quickSearch(like));
         specification = newSpec;
     }

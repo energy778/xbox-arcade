@@ -1,19 +1,23 @@
 package ru.veretennikov.service;
 
 import com.querydsl.core.Tuple;
-import com.querydsl.core.types.Expression;
-import com.querydsl.core.types.MappingProjection;
-import com.querydsl.core.types.Projections;
-import com.querydsl.core.types.QTuple;
+import com.querydsl.core.types.*;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.CaseBuilder;
+import com.querydsl.core.types.dsl.ComparableExpressionBase;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
+import com.vaadin.flow.data.provider.QuerySortOrder;
+import com.vaadin.flow.data.provider.SortDirection;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 import ru.veretennikov.domain.QGame;
 import ru.veretennikov.dto.GameDTO;
 
 import javax.persistence.EntityManager;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 @Service
 public class GameCallbackProviderQueryDSL extends GameCallbackProvider {
@@ -47,7 +51,7 @@ public class GameCallbackProviderQueryDSL extends GameCallbackProvider {
                         .rating(gameTuple.get(t_game.rating))
                         .price(gameTuple.get(t_game.price))
                         .location(gameTuple.get(t_game.location))
-                        .availability(gameTuple.get(t_game.availability))
+                        .availability(Optional.ofNullable(gameTuple.get(t_game.availability)).orElse(false))
                         .dateIssue(gameTuple.get(t_game.dateIssue))
                         .developer(gameTuple.get(t_game.developer))
                         .publisher(gameTuple.get(t_game.publisher))
@@ -76,9 +80,15 @@ public class GameCallbackProviderQueryDSL extends GameCallbackProvider {
     @Override
     public CallbackDataProvider.FetchCallback<GameDTO, Void> getFetchCallback() {
         return query -> {
+            Stream<? extends OrderSpecifier<?>> orderSpecifierStream = Optional.ofNullable(query.getSortOrders()).orElseGet(List::of).stream().flatMap(this::getOrderSpecifiers);
+            OrderSpecifier<?>[] orderList = Optional.of(orderSpecifierStream)
+                    .map(stream -> stream.toArray(OrderSpecifier<?>[]::new))
+                    .orElse(getOrderSpecifierStream(t_game.name, SortDirection.ASCENDING).toArray(OrderSpecifier<?>[]::new));
+
             if (ObjectUtils.isEmpty(like))
                 return queryFactory.select(gameGameDtoProjection)
                         .from(t_game)
+                        .orderBy(orderList)
                         .limit(query.getLimit())
                         .offset(query.getOffset())
                         .fetch()
@@ -87,6 +97,7 @@ public class GameCallbackProviderQueryDSL extends GameCallbackProvider {
                 return queryFactory.select(gameGameDtoProjection)
                         .from(t_game)
                         .where(getWhere())
+                        .orderBy(orderList)
                         .limit(query.getLimit())
                         .offset(query.getOffset())
                         .fetch()
@@ -98,6 +109,37 @@ public class GameCallbackProviderQueryDSL extends GameCallbackProvider {
         return t_game.name.containsIgnoreCase(like)
                 .or(t_game.description1.containsIgnoreCase(like))
                 .or(t_game.description2.containsIgnoreCase(like));
+    }
+
+    private Stream<? extends OrderSpecifier<?>> getOrderSpecifiers(QuerySortOrder item) {
+        String sorted = item.getSorted();
+        if (GameDTO.Fields.name.toString().equals(sorted))
+            return getOrderSpecifierStream(t_game.name, item.getDirection());
+        else if (GameDTO.Fields.releaseDate.toString().equals(sorted))
+            return getOrderSpecifierStream(t_game.releaseDate, item.getDirection());
+        else if (GameDTO.Fields.rating.toString().equals(sorted))
+            return getOrderSpecifierStream(t_game.rating, item.getDirection());
+        else if (GameDTO.Fields.price.toString().equals(sorted))
+            return getOrderSpecifierStream(t_game.price, item.getDirection());
+        else if (GameDTO.Fields.developer.toString().equals(sorted))
+            return getOrderSpecifierStream(t_game.developer, item.getDirection());
+        else if (GameDTO.Fields.publisher.toString().equals(sorted))
+            return getOrderSpecifierStream(t_game.publisher, item.getDirection());
+        else if ("available".equals(sorted))
+            return getOrderSpecifierStream(t_game.availability, item.getDirection());
+        /* custom */
+        else if ("pic".equals(sorted))
+            return getOrderSpecifierStream(
+                    new CaseBuilder()
+                            .when(t_game.picUrl.isNull())
+                            .then(false)
+                            .otherwise(true),
+                    item.getDirection());
+        return Stream.empty();
+    }
+
+    private <T extends ComparableExpressionBase<?>> Stream<OrderSpecifier<?>> getOrderSpecifierStream(T path, SortDirection direction) {
+        return SortDirection.DESCENDING.equals(direction) ? Stream.of(path.desc()) : Stream.of(path.asc());
     }
 
 }

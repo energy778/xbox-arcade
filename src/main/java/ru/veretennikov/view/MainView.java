@@ -16,6 +16,7 @@ import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.Route;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.util.ObjectUtils;
 import ru.veretennikov.component.GameEditDialog;
 import ru.veretennikov.component.GameEditor;
 import ru.veretennikov.dto.GameDTO;
@@ -41,7 +42,7 @@ public class MainView extends VerticalLayout {
     private CallbackDataProvider<GameDTO, Void> lazyDataProvider;
 //    endregion
 
-    public MainView(GameEditor editor, @Qualifier("gameCallbackProviderQueryDSL") GameCallbackProvider gameCallbackProvider) {
+    public MainView(GameEditor editor, @Qualifier("gameCallbackProviderBasic") GameCallbackProvider gameCallbackProvider) {
         this.gameCallbackProvider = gameCallbackProvider;
         this.gameEditDialog = new GameEditDialog(editor);
         this.grid = new Grid<>(GameDTO.class);
@@ -64,12 +65,11 @@ public class MainView extends VerticalLayout {
     }
 
     private void gridInit() {
-        lazyDataProvider = DataProvider.fromCallbacks(gameCallbackProvider.getFetchCallback(), gameCallbackProvider.getCountCallback());
-        grid.setDataProvider(lazyDataProvider);
-
         grid.removeAllColumns();
 
-        grid.addColumn(item -> "").setKey("rowIndex").setHeader("№");
+        grid.addColumn(item -> "")
+                .setKey("rowIndex")
+                .setHeader("№");
         grid.getColumnByKey("rowIndex").getElement()
                 .executeJs("this.renderer = function(root, column, rowData) {root.textContent = rowData.index + 1}");
 
@@ -81,22 +81,28 @@ public class MainView extends VerticalLayout {
                     return null;
                 })
                 .map(URL::toString)
-                .orElse(null), "screen"));
+                .orElse(""), "screen"));
 
         grid.addColumns("name", "releaseDate", "rating", "price", "developer", "publisher");
         grid.getColumnByKey("name").setWidth("17em");
 
         grid.addComponentColumn(gameDTO -> {
-            Checkbox checkbox = new Checkbox(!gameDTO.getPicUrl().isBlank());
+            Checkbox checkbox = new Checkbox(!ObjectUtils.isEmpty(gameDTO.getPicUrl()));
             checkbox.setEnabled(false);
             return checkbox;
-        }).setHeader("pic").setWidth("1em");
+        })
+                .setHeader("pic")
+                .setWidth("1em")
+                .setSortProperty("pic");
 
         grid.addComponentColumn(gameDTO -> {
             Checkbox checkbox = new Checkbox(gameDTO.isAvailability());
             checkbox.setEnabled(false);
-            return checkbox;}
-        ).setHeader("✔").setWidth("1em");
+            return checkbox;
+        })
+                .setHeader("✔")
+                .setWidth("1em")
+                .setSortProperty("available");
 
         grid.addItemDoubleClickListener(selectionEvent -> {
             gameEditDialog.setIdCurrentGame(selectionEvent.getItem().getId());
@@ -106,6 +112,11 @@ public class MainView extends VerticalLayout {
         // Listen changes made by the edit dialog, refresh data from backend
         gameEditDialog.setChangeHandler(this::refreshGridSource);
         gameEditDialog.setDeleteHandler(this::refreshGridSource);
+
+        grid.setMultiSort(true);
+
+        lazyDataProvider = DataProvider.fromCallbacks(gameCallbackProvider.getFetchCallback(), gameCallbackProvider.getCountCallback());
+        grid.setDataProvider(lazyDataProvider);
     }
 
     private void actionsInit() {

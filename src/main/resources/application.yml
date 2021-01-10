@@ -13,4 +13,4 @@ spring:
       format_sql: true
 
 app:
-  info: добавлен querydsl
+  info: добавлены сортировки по колонкам

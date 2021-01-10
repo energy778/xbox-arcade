@@ -28,9 +28,9 @@ public class GameCallbackProviderBasic extends GameCallbackProvider {
     public CallbackDataProvider.FetchCallback<GameDTO, Void> getFetchCallback() {
         return query -> {
             if (ObjectUtils.isEmpty(like))
-                return gameService.fetch(query.getOffset(), query.getLimit()).stream();
+                return gameService.fetch(query.getOffset(), query.getLimit(), getSort(query.getSortOrders())).stream();
             else
-                return gameService.fetch(like, query.getOffset(), query.getLimit()).stream();
+                return gameService.fetch(like, query.getOffset(), query.getLimit(), getSort(query.getSortOrders())).stream();
         };
     }
 

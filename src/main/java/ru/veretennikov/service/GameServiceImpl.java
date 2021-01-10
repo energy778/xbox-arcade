@@ -1,6 +1,7 @@
 package ru.veretennikov.service;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -121,23 +122,21 @@ public class GameServiceImpl implements GameService {
     }
 
     @Override
-    public List<GameDTO> fetch(int offset, int limit) {
-        return repository.findAll(new OffsetBasedPageRequest(offset, limit)).stream()
+    public List<GameDTO> fetch(int offset, int limit, Sort sort) {
+        return repository.findAll(new OffsetBasedPageRequest(offset, limit, sort)).stream()
                 .map(this::buildDTO)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public List<GameDTO> fetch(String like, int offset, int limit) {
-        return repository.findAllByNameLike(like, new OffsetBasedPageRequest(offset, limit)).stream()
+    public List<GameDTO> fetch(String like, int offset, int limit, Sort sort) {
+        return repository.findAllByNameLike(like, new OffsetBasedPageRequest(offset, limit, sort)).stream()
                 .map(this::buildDTO)
                 .collect(Collectors.toList());
     }
 
-    @Override
-    public List<GameDTO> fetch(Specification<Game> specification, int offset, int limit) {
-        OffsetBasedPageRequest pageRequest = new OffsetBasedPageRequest(offset, limit);
-        Page<Game> page = repository.findAll(specification, pageRequest);
+    public List<GameDTO> fetch(Specification<Game> specification, int offset, int limit, Sort sort) {
+        Page<Game> page = repository.findAll(specification, new OffsetBasedPageRequest(offset, limit, sort));
         return page.get()
                 .map(this::buildDTO)
                 .collect(Collectors.toList());
@@ -156,7 +155,7 @@ public class GameServiceImpl implements GameService {
                 .rating(game.getRating())
                 .price(game.getPrice())
                 .location(game.getLocation())
-                .availability(game.isAvailability())
+                .availability(game.getAvailability())
                 .dateIssue(game.getDateIssue())
                 .developer(game.getDeveloper())
                 .publisher(game.getPublisher())
@@ -175,7 +174,7 @@ public class GameServiceImpl implements GameService {
                 .rating(game.getRating())
                 .price(game.getPrice())
                 .location(game.getLocation())
-                .availability(game.isAvailability())
+                .availability(game.getAvailability())
                 .dateIssue(game.getDateIssue())
                 .developer(game.getDeveloper())
                 .publisher(game.getPublisher())
