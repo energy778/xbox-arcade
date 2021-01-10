@@ -42,4 +42,8 @@ public class GameDTO {
 
     private String publisher;
 
+//    use Optional in DTO and model
+//    https://stackoverflow.com/a/26328314/5406779
+//    https://dev.to/piczmar_0/java-optional-in-class-fields-why-not-40df
+
 }

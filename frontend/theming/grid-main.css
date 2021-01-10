@@ -1,0 +1,11 @@
+[part~="cell"]:not([part~="details-cell"]).available {
+    font-weight: bold;
+}
+
+[part~="cell"]:not([part~="details-cell"]).unavailable {
+    color: lightgray;
+}
+
+.ruMoney::before {
+    content: "₽";
+}

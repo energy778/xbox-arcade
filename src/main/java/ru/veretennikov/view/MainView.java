@@ -4,6 +4,7 @@ import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.KeyModifier;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Label;
@@ -15,6 +16,8 @@ import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.theme.Theme;
+import com.vaadin.flow.theme.lumo.Lumo;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.util.ObjectUtils;
 import ru.veretennikov.component.GameEditDialog;
@@ -27,6 +30,8 @@ import java.net.URL;
 import java.util.Optional;
 
 @Route
+@CssImport(value = "./theming/grid-main.css", themeFor="vaadin-grid")
+@Theme(value = Lumo.class, variant = Lumo.LIGHT)
 public class MainView extends VerticalLayout {
 
 //    region fields
@@ -69,7 +74,9 @@ public class MainView extends VerticalLayout {
 
         grid.addColumn(item -> "")
                 .setKey("rowIndex")
-                .setHeader("№");
+                .setHeader("№")
+                .setAutoWidth(true)
+                .setResizable(true);
         grid.getColumnByKey("rowIndex").getElement()
                 .executeJs("this.renderer = function(root, column, rowData) {root.textContent = rowData.index + 1}");
 
@@ -83,8 +90,30 @@ public class MainView extends VerticalLayout {
                 .map(URL::toString)
                 .orElse(""), "screen"));
 
-        grid.addColumns("name", "releaseDate", "rating", "price", "developer", "publisher");
-        grid.getColumnByKey("name").setWidth("17em");
+        grid.addColumn("name").setWidth("17em").setAutoWidth(true).setResizable(true);
+        grid.addColumn("releaseDate").setAutoWidth(true).setResizable(true);
+        grid.addColumn("rating").setAutoWidth(true).setResizable(true);
+        grid.addComponentColumn(gameDTO -> {
+            if (gameDTO.getPrice() == null || gameDTO.getPrice() == 0)
+                return new Label("Бесплатно");
+            return new Label(gameDTO.getPrice().toString());
+        }).setClassNameGenerator(gameDTO -> {
+            if (gameDTO.getPrice() != null && gameDTO.getPrice() != 0)
+                return "ruMoney";
+            return "";
+        })
+                .setHeader("Price")
+                .setSortProperty(GameDTO.Fields.price.toString())
+                .setAutoWidth(true)
+                .setResizable(true);
+        grid.addColumn("developer").setAutoWidth(true).setResizable(true);
+        grid.addColumn("publisher").setAutoWidth(true).setResizable(true);
+
+        grid.setClassNameGenerator(gameDTO -> {
+            if (gameDTO.isAvailability())
+                return "available";
+            return "unavailable";
+        });
 
         grid.addComponentColumn(gameDTO -> {
             Checkbox checkbox = new Checkbox(!ObjectUtils.isEmpty(gameDTO.getPicUrl()));
@@ -92,7 +121,8 @@ public class MainView extends VerticalLayout {
             return checkbox;
         })
                 .setHeader("pic")
-                .setWidth("1em")
+                .setAutoWidth(true)
+                .setResizable(true)
                 .setSortProperty("pic");
 
         grid.addComponentColumn(gameDTO -> {
@@ -101,7 +131,8 @@ public class MainView extends VerticalLayout {
             return checkbox;
         })
                 .setHeader("✔")
-                .setWidth("1em")
+                .setAutoWidth(true)
+                .setResizable(true)
                 .setSortProperty("available");
 
         grid.addItemDoubleClickListener(selectionEvent -> {
