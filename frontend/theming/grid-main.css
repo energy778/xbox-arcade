@@ -9,3 +9,33 @@
 .ruMoney::before {
     content: "₽";
 }
+
+.favourite {
+    background: center no-repeat url(./star.png); /* Путь к файлу с исходным рисунком  */
+    filter: brightness(0.5) sepia(1) saturate(10000%);
+    display: block; /*  Рисунок как блочный элемент */
+}
+.favourite:hover {
+    background: url(./star-o.png) no-repeat center; /* Путь к файлу с заменяемым рисунком  */
+}
+
+.unfavourite {
+    background: url(./star-o.png) no-repeat center; /* Путь к файлу с заменяемым рисунком  */
+    filter: brightness(0.5) sepia(1) saturate(10000%);
+    display: block; /*  Рисунок как блочный элемент */
+}
+.unfavourite:hover {
+    background: url(./star.png) no-repeat center; /* Путь к файлу с исходным рисунком  */
+}
+
+/*
+https://www.domysee.com/blogposts/coloring-white-images-css-filter
+https://stackoverflow.com/questions/40444540/css-add-color-to-black-white-png-image-using-a-filter
+
+    red
+filter: brightness(0.5) sepia(1) saturate(10000%);
+    yellow
+filter: invert(100%) sepia(5%) saturate(10000%) hue-rotate(0deg);
+    green
+filter: brightness(0.5) sepia(1) saturate(10000%) hue-rotate(120deg);
+*/

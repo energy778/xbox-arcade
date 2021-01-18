@@ -33,7 +33,12 @@ public class GameCallbackProviderSpecification extends GameCallbackProvider {
     public CallbackDataProvider.FetchCallback<GameDTO, Void> getFetchCallback() {
         return query -> {
             initSpecification();
-            return gameService.fetch(specification, query.getOffset(), query.getLimit(), getSort(query.getSortOrders())).stream();
+
+            if (ObjectUtils.isEmpty(like))
+                return gameService.fetch(specification, query.getOffset(), query.getLimit(), getSort(query.getSortOrders())).stream();
+            else
+//                https://stackoverflow.com/questions/26379522/can-i-combine-a-query-definition-with-a-specification-in-a-spring-data-jpa-repo - problem doesn't decisioned
+                return gameService.fetch(like, query.getOffset(), query.getLimit(), getSort(query.getSortOrders())).stream();
         };
     }
 

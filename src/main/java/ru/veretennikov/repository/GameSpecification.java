@@ -25,11 +25,12 @@ public class GameSpecification {
     }
 
     public static Specification<Game> likeDescription1(String expression) {
-        return (root, query, builder) -> builder.like(builder.lower(builder.concat("", root.get("description1"))), contains(expression.toLowerCase()));
+        return (root, query, builder) -> builder.like(builder.lower(root.get("description1")), contains(expression.toLowerCase()));
     }
 
     public static Specification<Game> likeDescription2(String expression) {
-        return (root, query, builder) -> builder.like(builder.lower(builder.concat("", root.get("description2"))), contains(expression.toLowerCase()));
+        return (root, query, builder) -> builder.like(builder.lower(root.get("description2")), contains(expression.toLowerCase()));
+//      or: return (root, query, builder) -> builder.like(builder.lower(builder.concat("", root.get("description2"))), contains(expression.toLowerCase()));
     }
 
     private static String contains(String expression) {

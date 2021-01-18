@@ -16,8 +16,6 @@ public interface GameService {
     List<GameWithDetailsDTO> getAllWithDetails();
     Optional<GameWithDetailsDTO> getByIdWithDetails(UUID uuid);
 
-    List<GameDTO> getAllByNameLike(String filterText);
-
     void delete(UUID id);
     GameWithDetailsDTO save(GameWithDetailsDTO currentGame);
 

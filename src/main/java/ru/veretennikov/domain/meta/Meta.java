@@ -143,4 +143,28 @@ public final class Meta {
         //endregion
     }
 
+    /**
+     * Таблица избранного
+     */
+    public static final class favourite {
+        public static final String name = "favourite";
+
+        //region Атрибуты
+        public static final class fields {
+            /**
+             * Идентификатор записи
+             */
+            public static final String id = "id";
+            /**
+             * ID игры
+             */
+            public static final String id_game = "id_game";
+            /**
+             * Игра
+             */
+            public static final String game = "game";
+        }
+        //endregion
+    }
+
 }

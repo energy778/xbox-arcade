@@ -36,14 +36,12 @@ public class GameServiceImpl implements GameService {
 
     @Override
     public List<GameDTO> getAll() {
-        return repository.findAll().stream()
-                .map(this::buildDTO)
-                .collect(Collectors.toList());
+        return repository.findAllGames();
     }
 
     @Override
     public Optional<GameDTO> getById(UUID uuid) {
-        return repository.findById(uuid).map(this::buildDTO);
+        return repository.findGameById(uuid);
     }
 
     @Override
@@ -61,13 +59,6 @@ public class GameServiceImpl implements GameService {
         return repository.findOneWithAllDetailsByGameWithGenres(
                 repository.findOneWithGenresById(uuid).orElse(null))
                 .map(this::buildDTOWithDetails);
-    }
-
-    @Override
-    public List<GameDTO> getAllByNameLike(String name) {
-        return repository.findAllByNameLike(name).stream()
-                .map(this::buildDTO)
-                .collect(Collectors.toList());
     }
 
     @Override
@@ -123,44 +114,18 @@ public class GameServiceImpl implements GameService {
 
     @Override
     public List<GameDTO> fetch(int offset, int limit, Sort sort) {
-        return repository.findAll(new OffsetBasedPageRequest(offset, limit, sort)).stream()
-                .map(this::buildDTO)
-                .collect(Collectors.toList());
+        return repository.findAllGames(new OffsetBasedPageRequest(offset, limit, sort));
     }
 
     @Override
     public List<GameDTO> fetch(String like, int offset, int limit, Sort sort) {
-        return repository.findAllByNameLike(like, new OffsetBasedPageRequest(offset, limit, sort)).stream()
-                .map(this::buildDTO)
-                .collect(Collectors.toList());
+        return repository.findAllByNameLike(like, new OffsetBasedPageRequest(offset, limit, sort));
     }
 
+    @Override
     public List<GameDTO> fetch(Specification<Game> specification, int offset, int limit, Sort sort) {
-        Page<Game> page = repository.findAll(specification, new OffsetBasedPageRequest(offset, limit, sort));
-        return page.get()
-                .map(this::buildDTO)
-                .collect(Collectors.toList());
-    }
-
-
-    private GameDTO buildDTO(Game game) {
-//        Vaadin model don't have null fields
-        return GameDTO.builder()
-                .id(Optional.ofNullable(game.getId()).orElse(UUID.fromString("00000000-0000-0000-0000-000000000000")))
-                .name(Optional.ofNullable(game.getName()).orElse(""))
-                .gameUrl(Optional.ofNullable(game.getGameUrl()).orElse(""))
-                .picUrl(Optional.ofNullable(game.getPicUrl()).orElse(""))
-                .releaseDate(game.getReleaseDate())
-                .description1(Optional.ofNullable(game.getDescription1()).orElse(""))
-                .description2(Optional.ofNullable(game.getDescription2()).orElse(""))
-                .rating(Optional.ofNullable(game.getRating()).orElse(""))
-                .price(Optional.ofNullable(game.getPrice()).orElse(0))
-                .location(Optional.ofNullable(game.getLocation()).orElse(""))
-                .availability(Optional.ofNullable(game.getAvailability()).orElse(false))
-                .dateIssue(game.getDateIssue())
-                .developer(Optional.ofNullable(game.getDeveloper()).orElse(""))
-                .publisher(Optional.ofNullable(game.getPublisher()).orElse(""))
-                .build();
+        Page<GameDTO> page = repository.findAllGames(specification, new OffsetBasedPageRequest(offset, limit, sort));
+        return page.toList();
     }
 
     private GameWithDetailsDTO buildDTOWithDetails(Game game) {

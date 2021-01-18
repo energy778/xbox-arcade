@@ -9,6 +9,7 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
@@ -23,6 +24,7 @@ import org.springframework.util.ObjectUtils;
 import ru.veretennikov.component.GameEditDialog;
 import ru.veretennikov.component.GameEditor;
 import ru.veretennikov.dto.GameDTO;
+import ru.veretennikov.service.FavouriteGameService;
 import ru.veretennikov.service.GameCallbackProvider;
 
 import java.net.MalformedURLException;
@@ -36,6 +38,7 @@ public class MainView extends VerticalLayout {
 
 //    region fields
     private final GameCallbackProvider gameCallbackProvider;
+    private final FavouriteGameService favouriteGameService;
 //    endregion
 
 //    region components
@@ -47,8 +50,9 @@ public class MainView extends VerticalLayout {
     private CallbackDataProvider<GameDTO, Void> lazyDataProvider;
 //    endregion
 
-    public MainView(GameEditor editor, @Qualifier("gameCallbackProviderQueryDSL") GameCallbackProvider gameCallbackProvider) {
+    public MainView(GameEditor editor, @Qualifier("gameCallbackProviderQueryDSL") GameCallbackProvider gameCallbackProvider, FavouriteGameService favouriteGameService) {
         this.gameCallbackProvider = gameCallbackProvider;
+        this.favouriteGameService = favouriteGameService;
         this.gameEditDialog = new GameEditDialog(editor);
         this.grid = new Grid<>(GameDTO.class);
         this.filter = new TextField();
@@ -69,8 +73,23 @@ public class MainView extends VerticalLayout {
         refreshGridSource();
     }
 
+    void refreshGridSource() {
+        lazyDataProvider.refreshAll();
+    }
+
     private void gridInit() {
         grid.removeAllColumns();
+
+        grid.addColumn(item -> "")
+                .setKey("favourite")
+                .setAutoWidth(true)
+                .setSortProperty("favourite")
+                .setClassNameGenerator(gameDTO -> {
+                    if (gameDTO.isFavorite())
+                        return "favourite";
+                    else
+                        return "unfavourite";
+                });
 
         grid.addColumn(item -> "")
                 .setKey("rowIndex")
@@ -88,7 +107,8 @@ public class MainView extends VerticalLayout {
                     return null;
                 })
                 .map(URL::toString)
-                .orElse(""), "screen"));
+                .orElse(""), "screen"))
+        .setWidth("85px");
 
         grid.addColumn("name").setWidth("17em").setAutoWidth(true).setResizable(true);
         grid.addColumn("releaseDate").setAutoWidth(true).setResizable(true);
@@ -135,6 +155,8 @@ public class MainView extends VerticalLayout {
                 .setResizable(true)
                 .setSortProperty("available");
 
+        grid.setSelectionMode(Grid.SelectionMode.NONE);
+        grid.addItemClickListener(event -> onClick(event.getColumn(), event.getItem()));
         grid.addItemDoubleClickListener(selectionEvent -> {
             gameEditDialog.setIdCurrentGame(selectionEvent.getItem().getId());
             gameEditDialog.open();
@@ -177,8 +199,23 @@ public class MainView extends VerticalLayout {
         });
     }
 
-    void refreshGridSource() {
-        lazyDataProvider.refreshAll();
+    private void onClick(Grid.Column<GameDTO> column, GameDTO item) {
+        if ("favourite".equals(column.getKey()))
+            favoritesProceed(item);
+    }
+
+    private void favoritesProceed(GameDTO item) {
+        String notification;
+        if (item.isFavorite()) {
+            notification = "remove from favourites";
+            favouriteGameService.delete(item.getId());
+        } else {
+            notification = "add to favourites";
+            favouriteGameService.add(item.getId());
+        }
+        item.setFavorite(!item.isFavorite());
+        grid.getDataCommunicator().refresh(item);
+        Notification.show(String.format("%s: %s", notification, item.getName()));
     }
 
 }

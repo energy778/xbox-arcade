@@ -13,7 +13,7 @@ spring:
       format_sql: true
       hibernate:
         order_by:
-          default_null_ordering: first
+          default_null_ordering: last
 
 app:
-  info: добавление стилей
+  info: функционал добавления игры в избранное

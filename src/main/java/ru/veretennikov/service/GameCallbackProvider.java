@@ -26,7 +26,7 @@ public abstract class GameCallbackProvider {
 //                    .map(item -> new Sort.Order(getSortDirection(item.getDirection()), item.getSorted()))
 //                    .toArray(Sort.Order[]::new));
 
-        Sort.TypedSort<Game> typedSortTemplate = Sort.sort(Game.class);
+        Sort.TypedSort<Game> typedSortGameTemplate = Sort.sort(Game.class);
         Sort sort = Sort.by(sortOrders.stream()
                 .flatMap(item -> {
                     String sorted = item.getSorted();
@@ -39,9 +39,13 @@ public abstract class GameCallbackProvider {
                         return Stream.ofNullable(new Sort.Order(getSortDirection(item.getDirection()), item.getSorted(), getNullHandlingByDirection(item.getDirection())));
                     /* custom columns */
                     if ("pic".equals(sorted))
-                        return addTypedSortDirection(typedSortTemplate.by((Game game) -> !ObjectUtils.isEmpty(game.getPicUrl())), item.getDirection()).get();
+                        return addTypedSortDirection(typedSortGameTemplate.by((Game game) -> !ObjectUtils.isEmpty(game.getPicUrl())), item.getDirection()).get();
                     else if ("available".equals(sorted))
-                        return addTypedSortDirection(typedSortTemplate.by((Game game) -> game.getAvailability() != null && game.getAvailability()), item.getDirection()).get();        // field type must be not primitive
+                        return addTypedSortDirection(typedSortGameTemplate.by((Game game) -> game.getAvailability() != null && game.getAvailability()), item.getDirection()).get();        // field type must be not primitive
+                    else if ("favourite".equals(sorted))
+                        return Stream.ofNullable(new Sort.Order(getSortDirection(item.getDirection()), "f.id", getNullHandlingByDirection(item.getDirection())));
+//                        return Stream.ofNullable(new Sort.Order(getSortDirection(item.getDirection()), "case when f.id is null then false else true end", getNullHandlingByDirection(item.getDirection())));  not supported
+//                        return JpaSort.unsafe(getSortDirection(item.getDirection()), "case when f.id is null then false else true end").get();                                                                not supported
                     else
                         return Stream.empty();
                 })

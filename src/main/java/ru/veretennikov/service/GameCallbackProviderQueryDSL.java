@@ -11,10 +11,12 @@ import com.vaadin.flow.data.provider.QuerySortOrder;
 import com.vaadin.flow.data.provider.SortDirection;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
+import ru.veretennikov.domain.QFavouriteGame;
 import ru.veretennikov.domain.QGame;
 import ru.veretennikov.dto.GameDTO;
 
 import javax.persistence.EntityManager;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -23,6 +25,9 @@ import java.util.stream.Stream;
 public class GameCallbackProviderQueryDSL extends GameCallbackProvider {
 
     private static final QGame t_game = QGame.game;
+    private static final QFavouriteGame t_favouriteGame = QFavouriteGame.favouriteGame;
+    public static final BooleanExpression FAVOURITE_EXPRESSION = new CaseBuilder().when(t_favouriteGame.id.isNull()).then(false).otherwise(true);
+
     private static final QTuple GAME_DTO_SELECT = Projections.tuple(t_game.id,
             t_game.name,
             t_game.gameUrl,
@@ -36,25 +41,23 @@ public class GameCallbackProviderQueryDSL extends GameCallbackProvider {
             t_game.availability,
             t_game.dateIssue,
             t_game.developer,
-            t_game.publisher);
+            t_game.publisher,
+            FAVOURITE_EXPRESSION
+    );
     private static final MappingProjection<GameDTO> gameGameDtoProjection = new MappingProjection<>(GameDTO.class, GAME_DTO_SELECT.getArgs().toArray(new Expression<?>[0])) {
         @Override
         protected GameDTO map(Tuple gameTuple) {
             return GameDTO.builder()
                         .id(gameTuple.get(t_game.id))
                         .name(gameTuple.get(t_game.name))
-                        .gameUrl(gameTuple.get(t_game.gameUrl))
                         .picUrl(gameTuple.get(t_game.picUrl))
                         .releaseDate(gameTuple.get(t_game.releaseDate))
-                        .description1(gameTuple.get(t_game.description1))
-                        .description2(gameTuple.get(t_game.description2))
                         .rating(gameTuple.get(t_game.rating))
                         .price(Optional.ofNullable(gameTuple.get(t_game.price)).orElse(0))
-                        .location(gameTuple.get(t_game.location))
                         .availability(Optional.ofNullable(gameTuple.get(t_game.availability)).orElse(false))
-                        .dateIssue(gameTuple.get(t_game.dateIssue))
                         .developer(gameTuple.get(t_game.developer))
                         .publisher(gameTuple.get(t_game.publisher))
+                        .favorite(Optional.ofNullable(gameTuple.get(FAVOURITE_EXPRESSION)).orElse(false))
                         .build();
         }
     };
@@ -80,14 +83,16 @@ public class GameCallbackProviderQueryDSL extends GameCallbackProvider {
     @Override
     public CallbackDataProvider.FetchCallback<GameDTO, Void> getFetchCallback() {
         return query -> {
-            Stream<? extends OrderSpecifier<?>> orderSpecifierStream = Optional.ofNullable(query.getSortOrders()).orElseGet(List::of).stream().flatMap(this::getOrderSpecifiers);
-            OrderSpecifier<?>[] orderList = Optional.of(orderSpecifierStream)
-                    .map(stream -> stream.toArray(OrderSpecifier<?>[]::new))
-                    .orElse(getOrderSpecifierStream(t_game.name, SortDirection.ASCENDING).toArray(OrderSpecifier<?>[]::new));
+            List<QuerySortOrder> sortOrders = (query.getSortOrders().isEmpty()) ? QuerySortOrder.asc("name").build() : query.getSortOrders();
+            OrderSpecifier<?>[] orderList = Stream.of(sortOrders)
+                    .flatMap(Collection::stream)
+                    .flatMap(this::getOrderSpecifiers)
+                    .toArray(OrderSpecifier<?>[]::new);
 
             if (ObjectUtils.isEmpty(like))
                 return queryFactory.select(gameGameDtoProjection)
                         .from(t_game)
+                        .leftJoin(t_favouriteGame).on(t_game.id.eq(t_favouriteGame.game.id))
                         .orderBy(orderList)
                         .limit(query.getLimit())
                         .offset(query.getOffset())
@@ -96,6 +101,7 @@ public class GameCallbackProviderQueryDSL extends GameCallbackProvider {
             else
                 return queryFactory.select(gameGameDtoProjection)
                         .from(t_game)
+                        .leftJoin(t_favouriteGame).on(t_game.id.eq(t_favouriteGame.game.id))
                         .where(getWhere())
                         .orderBy(orderList)
                         .limit(query.getLimit())
@@ -127,14 +133,14 @@ public class GameCallbackProviderQueryDSL extends GameCallbackProvider {
             return getOrderSpecifierStream(t_game.publisher, item.getDirection());
         else if ("available".equals(sorted))
             return getOrderSpecifierStream(t_game.availability, item.getDirection());
+        else if ("favourite".equals(sorted)) {
+            return getOrderSpecifierStream(FAVOURITE_EXPRESSION, item.getDirection());
+        }
         /* custom */
-        else if ("pic".equals(sorted))
-            return getOrderSpecifierStream(
-                    new CaseBuilder()
-                            .when(t_game.picUrl.isNull())
-                            .then(false)
-                            .otherwise(true),
-                    item.getDirection());
+        else if ("pic".equals(sorted)) {
+            BooleanExpression picExpression = new CaseBuilder().when(t_game.picUrl.isNull()).then(false).otherwise(true);
+            return getOrderSpecifierStream(picExpression, item.getDirection());
+        }
         return Stream.empty();
     }
 
