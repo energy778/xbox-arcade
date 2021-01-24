@@ -16,4 +16,4 @@ spring:
           default_null_ordering: last
 
 app:
-  info: функционал отзывов на игры
+  info: замена иконки избранного

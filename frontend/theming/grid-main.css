@@ -11,21 +11,25 @@
 }
 
 .favourite {
-    background: center no-repeat url(./star.png); /* Путь к файлу с исходным рисунком  */
+    /*background: center no-repeat url(./star.png); !* Путь к файлу с исходным рисунком  *!*/
+    background: center no-repeat url(./heart.png); /* Путь к файлу с исходным рисунком  */
     filter: brightness(0.5) sepia(1) saturate(10000%);
     display: block; /*  Рисунок как блочный элемент */
 }
 .favourite:hover {
-    background: url(./star-o.png) no-repeat center; /* Путь к файлу с заменяемым рисунком  */
+    /*background: url(./star-o.png) no-repeat center; !* Путь к файлу с заменяемым рисунком  *!*/
+    background: url(./heart-o.png) no-repeat center; /* Путь к файлу с заменяемым рисунком  */
 }
 
 .unfavourite {
-    background: url(./star-o.png) no-repeat center; /* Путь к файлу с заменяемым рисунком  */
+    /*background: url(./star-o.png) no-repeat center; !* Путь к файлу с заменяемым рисунком  *!*/
+    background: url(./heart-o.png) no-repeat center; /* Путь к файлу с заменяемым рисунком  */
     filter: brightness(0.5) sepia(1) saturate(10000%);
     display: block; /*  Рисунок как блочный элемент */
 }
 .unfavourite:hover {
-    background: url(./star.png) no-repeat center; /* Путь к файлу с исходным рисунком  */
+    /*background: url(./star.png) no-repeat center; !* Путь к файлу с исходным рисунком  *!*/
+    background: url(./heart.png) no-repeat center; /* Путь к файлу с исходным рисунком  */
 }
 
 /*
