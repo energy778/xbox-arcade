@@ -6,7 +6,6 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
@@ -23,13 +22,12 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.util.ObjectUtils;
 import ru.veretennikov.component.GameEditDialog;
 import ru.veretennikov.component.GameEditor;
+import ru.veretennikov.component.ReviewDialog;
+import ru.veretennikov.component.ReviewEditor;
 import ru.veretennikov.dto.GameDTO;
 import ru.veretennikov.service.FavouriteGameService;
 import ru.veretennikov.service.GameCallbackProvider;
-
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Optional;
+import ru.veretennikov.service.ReviewService;
 
 @Route
 @CssImport(value = "./theming/grid-main.css", themeFor="vaadin-grid")
@@ -42,18 +40,24 @@ public class MainView extends VerticalLayout {
 //    endregion
 
 //    region components
-    final Grid<GameDTO> grid;
-    final TextField filter;
-    final Button addNewBtn;
+    private final Grid<GameDTO> grid;
+    private final TextField filter;
+    private final Button addNewBtn;
     private final GameEditDialog gameEditDialog;
+    private final ReviewDialog reviewDialog;
     private Checkbox allowEdit;
     private CallbackDataProvider<GameDTO, Void> lazyDataProvider;
 //    endregion
 
-    public MainView(GameEditor editor, @Qualifier("gameCallbackProviderQueryDSL") GameCallbackProvider gameCallbackProvider, FavouriteGameService favouriteGameService) {
+    public MainView(GameEditor editor,
+                    ReviewEditor reviewEditor,
+                    @Qualifier("gameCallbackProviderQueryDSL") GameCallbackProvider gameCallbackProvider,
+                    FavouriteGameService favouriteGameService,
+                    ReviewService reviewService) {
         this.gameCallbackProvider = gameCallbackProvider;
         this.favouriteGameService = favouriteGameService;
         this.gameEditDialog = new GameEditDialog(editor);
+        this.reviewDialog = new ReviewDialog(reviewService, reviewEditor);
         this.grid = new Grid<>(GameDTO.class);
         this.filter = new TextField();
         this.addNewBtn = new Button("New game", VaadinIcon.PLUS.create());
@@ -90,6 +94,13 @@ public class MainView extends VerticalLayout {
                     else
                         return "unfavourite";
                 });
+
+        grid.addComponentColumn(gameDTO -> new Button(VaadinIcon.COMMENT_ELLIPSIS.create(), event -> {
+            reviewDialog.setCurrentGame(gameDTO.getId(), gameDTO.getName());
+            reviewDialog.open();
+        }))
+                .setAutoWidth(true)
+                .setResizable(false);
 
         grid.addColumn(item -> "")
                 .setKey("rowIndex")
@@ -140,7 +151,7 @@ public class MainView extends VerticalLayout {
             checkbox.setEnabled(false);
             return checkbox;
         })
-                .setHeader("pic")
+                .setHeader("Pic")
                 .setAutoWidth(true)
                 .setResizable(true)
                 .setSortProperty("pic");

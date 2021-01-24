@@ -9,12 +9,14 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 
 public class WindowDescriptionLayout extends HorizontalLayout {
 
+    private final Label windowDescriptionLabel;
+
     public WindowDescriptionLayout(String windowDescription, ComponentEventListener<ClickEvent<Button>> onCloseClickListener) {
         setPadding(false);
         setMargin(false);
         setWidthFull();
 
-        Label windowDescriptionLabel = new Label(windowDescription);
+        windowDescriptionLabel = new Label(windowDescription);
         windowDescriptionLabel.getStyle().set("font-weight", "bold");
         windowDescriptionLabel.getStyle().set("text-align", "center");
         expand(windowDescriptionLabel);
@@ -26,6 +28,10 @@ public class WindowDescriptionLayout extends HorizontalLayout {
         closeButton.setIcon(VaadinIcon.CLOSE.create());
         closeButton.addClickListener(onCloseClickListener);
         add(closeButton);
+    }
+
+    public void setWindowDescription(String windowDescription) {
+        this.windowDescriptionLabel.setText(windowDescription);
     }
 
 }

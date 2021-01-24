@@ -11,6 +11,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface GameService {
+    Game getOne(UUID uuid);
+
     List<GameDTO> getAll();
     Optional<GameDTO> getById(UUID uuid);
     List<GameWithDetailsDTO> getAllWithDetails();

@@ -40,6 +40,11 @@ public class GameServiceImpl implements GameService {
     }
 
     @Override
+    public Game getOne(UUID uuid) {
+        return repository.getOne(uuid);
+    }
+
+    @Override
     public Optional<GameDTO> getById(UUID uuid) {
         return repository.findGameById(uuid);
     }

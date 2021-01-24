@@ -29,19 +29,18 @@ import ru.veretennikov.service.GameService;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.Collection;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Stream;
+
+import static ru.veretennikov.util.front.FrontHelper.DATE_PICKER_I18N;
+import static ru.veretennikov.util.front.FrontHelper.DATE_PICKER_LOCALE;
 
 @SpringComponent
 @UIScope
 public class GameEditor extends VerticalLayout implements KeyNotifier {
-
-    public static final Locale DATE_PICKER_LOCALE = new Locale("ru");
-    public static final DatePicker.DatePickerI18n DATE_PICKER_I18N = new DatePicker.DatePickerI18n()
-            .setWeek("Неделя").setCalendar("Календарь").setClear("Очистить").setToday("Сегодня").setCancel("Отмена").setFirstDayOfWeek(1)
-            .setMonthNames(Arrays.asList("Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"))
-            .setWeekdays(Arrays.asList("Воскресенье", "Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"))
-            .setWeekdaysShort(Arrays.asList("вс", "пн", "вт", "ср", "чт", "пт", "сб"));
 
     private final GameService service;
 

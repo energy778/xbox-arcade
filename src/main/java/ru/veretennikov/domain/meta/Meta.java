@@ -167,4 +167,36 @@ public final class Meta {
         //endregion
     }
 
+    /**
+     * Таблица отзывов на игры
+     */
+    public static final class review {
+        public static final String name = "review";
+
+        //region Атрибуты
+        public static final class fields {
+            /**
+             * Идентификатор записи
+             */
+            public static final String id = "id";
+            /**
+             * Дата обновления отзыва
+             */
+            public static final String updated = "updated";
+            /**
+             * Отзыв
+             */
+            public static final String note = "note";
+            /**
+             * ID игры
+             */
+            public static final String id_game = "id_game";
+            /**
+             * Игра
+             */
+            public static final String game = "game";
+        }
+        //endregion
+    }
+
 }
