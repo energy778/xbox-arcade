@@ -15,10 +15,13 @@ import java.util.stream.Stream;
 public abstract class GameCallbackProvider {
 
     @Setter
-    protected String like;
+    protected GameDTO.GameFilter filter;
 
     public abstract CallbackDataProvider.CountCallback<GameDTO, Void> getCountCallback();
     public abstract CallbackDataProvider.FetchCallback<GameDTO, Void> getFetchCallback();
+    public abstract Stream<String> fetchRatings();
+    public abstract Stream<String> fetchDevelopers();
+    public abstract Stream<String> fetchPublishers();
 
     protected Sort getSort(List<QuerySortOrder> sortOrders) {
         /* primitive */

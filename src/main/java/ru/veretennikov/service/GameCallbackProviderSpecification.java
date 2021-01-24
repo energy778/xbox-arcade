@@ -9,6 +9,8 @@ import ru.veretennikov.domain.Game;
 import ru.veretennikov.dto.GameDTO;
 import ru.veretennikov.repository.GameSpecification;
 
+import java.util.stream.Stream;
+
 @Primary
 @Service
 public class GameCallbackProviderSpecification extends GameCallbackProvider {
@@ -34,18 +36,33 @@ public class GameCallbackProviderSpecification extends GameCallbackProvider {
         return query -> {
             initSpecification();
 
-            if (ObjectUtils.isEmpty(like))
+            if (ObjectUtils.isEmpty(filter.getLike()))
                 return gameService.fetch(specification, query.getOffset(), query.getLimit(), getSort(query.getSortOrders())).stream();
             else
 //                https://stackoverflow.com/questions/26379522/can-i-combine-a-query-definition-with-a-specification-in-a-spring-data-jpa-repo - problem doesn't decisioned
-                return gameService.fetch(like, query.getOffset(), query.getLimit(), getSort(query.getSortOrders())).stream();
+                return gameService.fetch(filter.getLike(), query.getOffset(), query.getLimit(), getSort(query.getSortOrders())).stream();
         };
+    }
+
+    @Override
+    public Stream<String> fetchRatings() {
+        return Stream.empty();
+    }
+
+    @Override
+    public Stream<String> fetchDevelopers() {
+        return Stream.empty();
+    }
+
+    @Override
+    public Stream<String> fetchPublishers() {
+        return Stream.empty();
     }
 
     private void initSpecification() {
         Specification<Game> newSpec = GameSpecification.getEmpty();
-        if (!ObjectUtils.isEmpty(like))
-            newSpec = newSpec.and(GameSpecification.quickSearch(like));
+        if (!ObjectUtils.isEmpty(filter.getLike()))
+            newSpec = newSpec.and(GameSpecification.quickSearch(filter.getLike()));
         specification = newSpec;
     }
 

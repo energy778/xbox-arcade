@@ -7,6 +7,7 @@ import lombok.Setter;
 import lombok.experimental.FieldNameConstants;
 
 import java.time.LocalDate;
+import java.util.Set;
 import java.util.UUID;
 
 @Builder
@@ -52,5 +53,15 @@ public class GameDTO {
 //    use Optional in DTO and model
 //    https://stackoverflow.com/a/26328314/5406779
 //    https://dev.to/piczmar_0/java-optional-in-class-fields-why-not-40df
+
+    @Getter
+    @Builder
+    public static class GameFilter {
+        String like, likeName;
+        LocalDate releaseDateFrom, releaseDateTo;
+        Integer priceFrom, priceTo;
+        Set<Boolean> favourite, picAvailable, available;
+        Set<String> ratingIds, developerIds, publisherIds;
+    }
 
 }

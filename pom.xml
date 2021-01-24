@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>ru.veretennikov</groupId>
 	<artifactId>xbox-arcade</artifactId>
-	<version>1.5.2</version>
+	<version>1.6.0</version>
 	<packaging>war</packaging>
 	<name>xbox-arcade</name>
 

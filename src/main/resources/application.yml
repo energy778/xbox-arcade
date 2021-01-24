@@ -16,4 +16,4 @@ spring:
           default_null_ordering: last
 
 app:
-  info: скрытие пиктограммы игры в списке игр
+  info: добавлены фильтры для списка игр (только для query sql callback provider)
