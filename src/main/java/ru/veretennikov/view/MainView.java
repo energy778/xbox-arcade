@@ -110,16 +110,16 @@ public class MainView extends VerticalLayout {
         grid.getColumnByKey("rowIndex").getElement()
                 .executeJs("this.renderer = function(root, column, rowData) {root.textContent = rowData.index + 1}");
 
-        grid.addComponentColumn(gameDTO -> new Image(Optional.ofNullable(gameDTO.getPicUrl())
-                .map(s -> {
-                    try {
-                        return new URL(s);
-                    } catch (MalformedURLException ignored) {}
-                    return null;
-                })
-                .map(URL::toString)
-                .orElse(""), "screen"))
-        .setWidth("85px");
+//        grid.addComponentColumn(gameDTO -> new Image(Optional.ofNullable(gameDTO.getPicUrl())
+//                .map(s -> {
+//                    try {
+//                        return new URL(s);
+//                    } catch (MalformedURLException ignored) {}
+//                    return null;
+//                })
+//                .map(URL::toString)
+//                .orElse(""), "screen"))
+//        .setWidth("85px");
 
         grid.addColumn("name").setWidth("17em").setAutoWidth(true).setResizable(true);
         grid.addColumn("releaseDate").setAutoWidth(true).setResizable(true);

@@ -16,4 +16,4 @@ spring:
           default_null_ordering: last
 
 app:
-  info: замена иконки избранного
+  info: скрытие пиктограммы игры в списке игр
